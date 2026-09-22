@@ -1,0 +1,85 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: pulse_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-pulse_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pulse_password}
+      POSTGRES_DB: ${POSTGRES_DB:-pulse_commerce}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-pulse_user} -d ${POSTGRES_DB:-pulse_commerce}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pulse_network
+
+  valkey:
+    image: valkey/valkey:8.0-alpine
+    container_name: pulse_valkey
+    restart: unless-stopped
+    ports:
+      - "${VALKEY_PORT:-6379}:6379"
+    volumes:
+      - valkey_data:/data
+    command: ["valkey-server", "--save", "60", "1", "--loglevel", "notice"]
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - pulse_network
+
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    container_name: pulse_backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      API_PREFIX: api/v1
+      DATABASE_URL: postgresql://${POSTGRES_USER:-pulse_user}:${POSTGRES_PASSWORD:-pulse_password}@postgres:5432/${POSTGRES_DB:-pulse_commerce}?schema=public
+      VALKEY_HOST: valkey
+      VALKEY_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET:-super-secret-pulsecommerce-jwt-signing-key-production-ready-32-chars}
+      LOG_LEVEL: info
+    ports:
+      - "3000:3000"
+    networks:
+      - pulse_network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+    container_name: pulse_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+    networks:
+      - pulse_network
+
+networks:
+  pulse_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+  valkey_data:
+    driver: local

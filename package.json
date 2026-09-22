@@ -1,0 +1,25 @@
+{
+  "name": "pulsecommerce-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Enterprise-grade Multi-Warehouse Inventory & Order Fulfillment Platform",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "test:unit": "npm run test:unit --workspaces --if-present",
+    "test:e2e": "npm run test:e2e --workspace=pulsecommerce-backend",
+    "lint": "npm run lint --workspaces --if-present",
+    "dev": "concurrently -n \"backend,frontend\" -c \"blue,green\" \"npm run start:dev --workspace=pulsecommerce-backend\" \"npm run dev --workspace=pulsecommerce-frontend\"",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "typescript": "^5.7.3"
+  }
+}
