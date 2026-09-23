@@ -18,10 +18,25 @@ import {
 } from '@pulsecommerce/shared-types';
 
 async function seed() {
-  console.log('🌱 Starting TypeORM Database Seeding for PulseCommerce...');
+  console.log('🌱 Starting TypeORM Database Initialization & Seeding for PulseCommerce...');
 
-  await AppDataSource.initialize();
+  let retries = 5;
+  while (retries > 0) {
+    try {
+      await AppDataSource.initialize();
+      break;
+    } catch (err) {
+      retries--;
+      if (retries === 0) throw err;
+      console.log(`Database connection failed, retrying in 2 seconds... (${retries} retries left)`);
+      await new Promise((res) => setTimeout(res, 2000));
+    }
+  }
   console.log('Connected to database via AppDataSource');
+
+  console.log('Running pending migrations...');
+  await AppDataSource.runMigrations();
+  console.log('✓ Migrations applied successfully');
 
   const tenantRepo = AppDataSource.getRepository(Tenant);
   const userRepo = AppDataSource.getRepository(User);

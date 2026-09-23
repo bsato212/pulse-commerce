@@ -44,4 +44,4 @@ WORKDIR /app/apps/backend
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "node dist/src/main"]
+CMD ["sh", "-c", "node dist/database/seeds/seed.js && node dist/main.js"]

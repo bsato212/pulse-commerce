@@ -15,6 +15,7 @@ import {
   OutboxEvent,
   WebhookSubscription,
 } from './entities';
+import { InitialMigration1710000000000 } from './migrations/1710000000000-InitialMigration';
 
 @Global()
 @Module({
@@ -40,6 +41,8 @@ import {
           OutboxEvent,
           WebhookSubscription,
         ],
+        migrations: [InitialMigration1710000000000],
+        migrationsRun: true,
         synchronize: false,
         logging: config.get<string>('NODE_ENV') !== 'production',
       }),
