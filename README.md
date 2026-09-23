@@ -5,8 +5,8 @@
 [![NestJS](https://img.shields.io/badge/NestJS-11-red.svg)](https://nestjs.com/)
 [![TypeORM](https://img.shields.io/badge/TypeORM-0.3-orange.svg)](https://typeorm.io/)
 [![React](https://img.shields.io/badge/React-19-cyan.svg)](https://react.dev/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue.svg)](https://www.postgresql.org/)
-[![Valkey](https://img.shields.io/badge/Valkey-8.0-purple.svg)](https://valkey.io/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-blue.svg)](https://www.postgresql.org/)
+[![Valkey](https://img.shields.io/badge/Valkey-9.0-purple.svg)](https://valkey.io/)
 
 PulseCommerce is an enterprise-grade Order Management System (OMS) and Multi-Warehouse Inventory Allocation platform. Designed for high-throughput fulfillment, multi-tenant B2B/B2C operations, and event-driven logistics dispatching.
 

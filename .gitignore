@@ -31,7 +31,6 @@ pnpm-debug.log*
 # Database & Valkey
 *.sqlite
 *.sqlite3
-prisma/dev.db
 dump.rdb
 
 # System & IDE
