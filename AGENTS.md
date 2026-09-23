@@ -43,6 +43,8 @@ pulsecommerce/
 - **Object-Relational Mapping (ORM)**: TypeORM 0.3.x with PostgreSQL driver (`pg`)
 - **Database**: PostgreSQL 18
 - **In-Memory Cache**: Valkey 9.0 (high-performance Redis-compatible engine)
+- **Contract & Schema Validation**: Zod 4.x with `nestjs-zod` 5.x
+- **Integration Testing**: Testcontainers 12.x (`@testcontainers/postgresql` and Valkey 9.0)
 - **Logging**: Pino structured JSON logger with request correlation
 - **Frontend**: React 19, TypeScript, Vite, Tailwind CSS, Lucide React
 - **Code Quality**: ESLint 9 (flat config) and Prettier 3
@@ -72,6 +74,9 @@ npm run test --workspace=pulsecommerce-backend
 
 # Run backend end-to-end tests
 npm run test:e2e --workspace=pulsecommerce-backend
+
+# Run backend integration tests (ephemeral PostgreSQL 18 & Valkey 9.0 via Testcontainers)
+npm run test:integration
 
 # Run frontend component tests
 npm run test --workspace=pulsecommerce-frontend
@@ -143,6 +148,13 @@ npm run docker:up
 - Inject NestJS `Logger` (`private readonly logger = new Logger(ServiceName.name);`) or the global Pino logger.
 - Log meaningful context objects alongside log messages.
 
+### Contract Validation & Schema Safety
+
+- Canonical schemas must be defined in `packages/shared-types` using Zod (`z.object(...)`).
+- Backend DTOs must extend `createZodDto(Schema)` from `nestjs-zod`.
+- Controllers must use `ZodValidationPipe` to validate and sanitize incoming payloads.
+- Route parameters representing entity IDs (`:id`, `:orderId`, `:warehouseId`) must use `ParseUUIDPipe({ version: '4' })` to validate RFC 4122 v4 UUID format before querying the database.
+
 ### Frontend Patterns
 
 - Modern functional React components with hooks.
@@ -157,7 +169,7 @@ npm run docker:up
 Before completing any task or pull request:
 
 1. Ensure all code compiles cleanly: `npm run build`
-2. Ensure all unit and e2e tests pass: `npm test && npm run test:e2e --workspace=pulsecommerce-backend`
+2. Ensure all unit, integration, and e2e tests pass: `npm test && npm run test:e2e --workspace=pulsecommerce-backend && npm run test:integration`
 3. Ensure no linting errors exist: `npm run lint`
 4. Ensure all formatting adheres to Prettier: `npm run format:check`
 5. Ensure Docker compose definitions remain valid: `docker compose config`

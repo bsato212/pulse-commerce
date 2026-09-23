@@ -48,7 +48,11 @@ export class ValkeyService implements OnModuleInit, OnModuleDestroy {
 
   async onModuleDestroy() {
     if (this.client) {
-      await this.client.quit().catch(() => {});
+      try {
+        this.client.disconnect();
+      } catch {
+        // ignore
+      }
     }
   }
 

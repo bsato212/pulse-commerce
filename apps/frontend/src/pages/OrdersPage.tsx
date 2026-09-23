@@ -45,7 +45,7 @@ export const OrdersPage: React.FC = () => {
       // Fallback seed orders if backend is not currently running
       setOrders([
         {
-          id: 'd0000000-0000-0000-0000-000000000001',
+          id: 'd0000000-0000-4000-8000-000000000001',
           orderNumber: 'ORD-2026-1001',
           customerEmail: 'jane.smith@example.com',
           status: 'CONFIRMED',
@@ -60,7 +60,7 @@ export const OrdersPage: React.FC = () => {
           createdAt: new Date().toISOString(),
           items: [
             {
-              id: 'e0000000-0000-0000-0000-000000000001',
+              id: 'e0000000-0000-4000-8000-000000000001',
               sku: 'AUDIO-ANC-PRO',
               productName: 'Pulse ANC Pro Wireless Headphones',
               unitPrice: 299.99,
@@ -68,7 +68,7 @@ export const OrdersPage: React.FC = () => {
               subtotal: 279.99,
             },
             {
-              id: 'e0000000-0000-0000-0000-000000000002',
+              id: 'e0000000-0000-4000-8000-000000000002',
               sku: 'AUDIO-DAC-MINI',
               productName: 'Pulse Mini USB-C HiFi DAC',
               unitPrice: 89.5,
@@ -78,7 +78,7 @@ export const OrdersPage: React.FC = () => {
           ],
         },
         {
-          id: 'd0000000-0000-0000-0000-000000000002',
+          id: 'd0000000-0000-4000-8000-000000000002',
           orderNumber: 'ORD-2026-1002',
 
           customerEmail: 'jane.smith@example.com',
@@ -94,7 +94,7 @@ export const OrdersPage: React.FC = () => {
           createdAt: new Date().toISOString(),
           items: [
             {
-              id: 'item-3',
+              id: 'e0000000-0000-4000-8000-000000000003',
               sku: 'FURN-ERGO-CHAIR',
               productName: 'ErgoPulse Mesh Desk Chair',
               unitPrice: 450.0,

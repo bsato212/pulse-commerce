@@ -7,14 +7,15 @@ import {
   Body,
   Query,
   UsePipes,
-  ValidationPipe,
+  ParseUUIDPipe,
 } from '@nestjs/common';
+import { ZodValidationPipe } from 'nestjs-zod';
 import { ProductsService } from './products.service';
 import { CreateProductDto, ProductQueryDto, UpdateProductPriceDto } from './dto/products.dto';
 import { TenantId } from '../../common/decorators/current-user.decorator';
 
 @Controller('products')
-@UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+@UsePipes(new ZodValidationPipe())
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
@@ -24,7 +25,7 @@ export class ProductsController {
   }
 
   @Get(':id')
-  async getProduct(@Param('id') id: string) {
+  async getProduct(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
     return this.productsService.getProductById(id);
   }
 
@@ -34,7 +35,10 @@ export class ProductsController {
   }
 
   @Put(':id/price')
-  async updatePrice(@Param('id') id: string, @Body() dto: UpdateProductPriceDto) {
+  async updatePrice(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Body() dto: UpdateProductPriceDto,
+  ) {
     return this.productsService.updateProductPrice(id, dto);
   }
 }

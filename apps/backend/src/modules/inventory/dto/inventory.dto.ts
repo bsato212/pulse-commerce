@@ -1,4 +1,8 @@
-import { IsString, IsInt, IsOptional, Min, IsEnum } from 'class-validator';
+import { createZodDto } from 'nestjs-zod';
+import {
+  StockAdjustmentRequestSchema,
+  StockReservationRequestSchema,
+} from '@pulsecommerce/shared-types';
 
 export enum AdjustmentReason {
   RECEIVING = 'RECEIVING',
@@ -7,32 +11,5 @@ export enum AdjustmentReason {
   MANUAL_CORRECTION = 'MANUAL_CORRECTION',
 }
 
-export class StockAdjustmentDto {
-  @IsString()
-  warehouseId: string;
-
-  @IsString()
-  productId: string;
-
-  @IsInt()
-  quantityDelta: number;
-
-  @IsEnum(AdjustmentReason)
-  reason: AdjustmentReason;
-}
-
-export class ReserveStockDto {
-  @IsString()
-  productId: string;
-
-  @IsString()
-  warehouseId: string;
-
-  @IsInt()
-  @Min(1)
-  quantity: number;
-
-  @IsOptional()
-  @IsString()
-  orderId?: string;
-}
+export class StockAdjustmentDto extends createZodDto(StockAdjustmentRequestSchema) {}
+export class ReserveStockDto extends createZodDto(StockReservationRequestSchema) {}

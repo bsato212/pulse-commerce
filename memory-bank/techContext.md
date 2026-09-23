@@ -2,22 +2,25 @@
 
 ## Core Technologies & Versions
 
-| Layer                  | Technology     | Version           | Purpose                                                      |
-| ---------------------- | -------------- | ----------------- | ------------------------------------------------------------ |
-| **Runtime**            | Node.js        | >= 24.x           | Unified execution runtime for backend and tooling            |
-| **Backend Framework**  | NestJS         | 11.x              | Modular dependency-injected server architecture              |
-| **ORM**                | TypeORM        | 0.3.x             | Object-relational mapping, migrations, and transactions      |
-| **Database**           | PostgreSQL     | 18                | Primary relational data store with ACID guarantees           |
-| **Cache Engine**       | Valkey         | 9.0               | High-performance memory-first key-value store                |
-| **Logging**            | Pino           | 9.x               | High-throughput structured JSON logging with correlation IDs |
-| **Frontend Framework** | React          | 19.x              | Declarative component UI                                     |
-| **Frontend Tooling**   | Vite           | 6.x               | Fast dev server and optimized production bundling            |
-| **Styling**            | Tailwind CSS   | 3.4.x             | Utility-first responsive CSS styling                         |
-| **Icons**              | Lucide React   | 0.475.x           | Modern iconography across dashboard and tables               |
-| **Linter**             | ESLint         | 9.x (flat config) | Code quality, consistency, and syntax validation             |
-| **Formatter**          | Prettier       | 3.x               | Automated opinionated code formatting                        |
-| **Testing**            | Jest & Vitest  | Latest            | Backend unit/e2e and frontend component testing              |
-| **Containerization**   | Docker Compose | v2                | Declarative multi-container orchestration                    |
+| Layer                   | Technology     | Version           | Purpose                                                      |
+| ----------------------- | -------------- | ----------------- | ------------------------------------------------------------ |
+| **Runtime**             | Node.js        | >= 24.x           | Unified execution runtime for backend and tooling            |
+| **Backend Framework**   | NestJS         | 11.x              | Modular dependency-injected server architecture              |
+| **ORM**                 | TypeORM        | 0.3.x             | Object-relational mapping, migrations, and transactions      |
+| **Database**            | PostgreSQL     | 18                | Primary relational data store with ACID guarantees           |
+| **Cache Engine**        | Valkey         | 9.0               | High-performance memory-first key-value store                |
+| **Validation**          | Zod            | 4.6.x             | Monorepo schema contracts and runtime validation             |
+| **Validation Adapter**  | nestjs-zod     | 5.5.x             | NestJS DTO integration and pipe validation                   |
+| **Logging**             | Pino           | 9.x               | High-throughput structured JSON logging with correlation IDs |
+| **Frontend Framework**  | React          | 19.x              | Declarative component UI                                     |
+| **Frontend Tooling**    | Vite           | 6.x               | Fast dev server and optimized production bundling            |
+| **Styling**             | Tailwind CSS   | 3.4.x             | Utility-first responsive CSS styling                         |
+| **Icons**               | Lucide React   | 0.475.x           | Modern iconography across dashboard and tables               |
+| **Linter**              | ESLint         | 9.x (flat config) | Code quality, consistency, and syntax validation             |
+| **Formatter**           | Prettier       | 3.x               | Automated opinionated code formatting                        |
+| **Testing**             | Jest & Vitest  | Latest            | Backend unit/e2e and frontend component testing              |
+| **Integration Testing** | Testcontainers | 12.1.x            | Ephemeral PostgreSQL 18 & Valkey 9.0 live integration suites |
+| **Containerization**    | Docker Compose | v2                | Declarative multi-container orchestration                    |
 
 ## Database Schema Model (TypeORM Entities)
 

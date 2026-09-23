@@ -1,13 +1,5 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Param,
-  Body,
-  Query,
-  UsePipes,
-  ValidationPipe,
-} from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Query, UsePipes, ParseUUIDPipe } from '@nestjs/common';
+import { ZodValidationPipe } from 'nestjs-zod';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto, UpdateOrderStatusDto } from './dto/orders.dto';
 import {
@@ -18,7 +10,7 @@ import {
 import { OrderStatus } from '@pulsecommerce/shared-types';
 
 @Controller('orders')
-@UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+@UsePipes(new ZodValidationPipe())
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
@@ -28,7 +20,10 @@ export class OrdersController {
   }
 
   @Get(':id')
-  async getOrder(@Param('id') id: string, @TenantId() tenantId: string) {
+  async getOrder(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @TenantId() tenantId: string,
+  ) {
     return this.ordersService.getOrderById(id, tenantId);
   }
 
@@ -43,7 +38,7 @@ export class OrdersController {
 
   @Post(':id/status')
   async transitionStatus(
-    @Param('id') id: string,
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @TenantId() tenantId: string,
     @Body() dto: UpdateOrderStatusDto,
   ) {
@@ -51,7 +46,7 @@ export class OrdersController {
   }
 
   @Get(':id/invoice')
-  async getOrderInvoicePdf(@Param('id') orderId: string) {
+  async getOrderInvoicePdf(@Param('id', new ParseUUIDPipe({ version: '4' })) orderId: string) {
     return this.ordersService.generateInvoicePdf(orderId);
   }
 }

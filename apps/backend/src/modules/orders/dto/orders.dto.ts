@@ -1,68 +1,12 @@
+import { createZodDto } from 'nestjs-zod';
 import {
-  IsString,
-  IsEmail,
-  IsArray,
-  ValidateNested,
-  IsNumber,
-  IsPositive,
-  IsOptional,
-  IsEnum,
-} from 'class-validator';
-import { Type } from 'class-transformer';
-import { OrderStatus } from '@pulsecommerce/shared-types';
+  OrderItemInputSchema,
+  ShippingAddressSchema,
+  CreateOrderRequestSchema,
+  UpdateOrderStatusSchema,
+} from '@pulsecommerce/shared-types';
 
-export class OrderItemInputDto {
-  @IsString()
-  productId: string;
-
-  @IsNumber()
-  @IsPositive()
-  quantity: number;
-}
-
-export class ShippingAddressDto {
-  @IsString()
-  street: string;
-
-  @IsString()
-  city: string;
-
-  @IsString()
-  state: string;
-
-  @IsString()
-  postalCode: string;
-
-  @IsString()
-  country: string;
-}
-
-export class CreateOrderDto {
-  @IsEmail()
-  customerEmail: string;
-
-  @ValidateNested()
-  @Type(() => ShippingAddressDto)
-  shippingAddress: ShippingAddressDto;
-
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => OrderItemInputDto)
-  items: OrderItemInputDto[];
-
-  @IsOptional()
-  @IsString()
-  discountCode?: string;
-
-  @IsOptional()
-  billingAddress?: Record<string, any>;
-}
-
-export class UpdateOrderStatusDto {
-  @IsEnum(OrderStatus)
-  status: OrderStatus;
-
-  @IsOptional()
-  @IsString()
-  notes?: string;
-}
+export class OrderItemInputDto extends createZodDto(OrderItemInputSchema) {}
+export class ShippingAddressDto extends createZodDto(ShippingAddressSchema) {}
+export class CreateOrderDto extends createZodDto(CreateOrderRequestSchema) {}
+export class UpdateOrderStatusDto extends createZodDto(UpdateOrderStatusSchema) {}

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, ParseUUIDPipe } from '@nestjs/common';
 import { FulfillmentService } from './fulfillment.service';
 import { OutboxService } from './events/outbox.service';
 import { TenantId } from '../../common/decorators/current-user.decorator';
@@ -17,8 +17,8 @@ export class FulfillmentController {
 
   @Post('orders/:orderId/ship')
   async shipOrder(
-    @Param('orderId') orderId: string,
-    @Body('warehouseId') warehouseId: string,
+    @Param('orderId', new ParseUUIDPipe({ version: '4' })) orderId: string,
+    @Body('warehouseId', new ParseUUIDPipe({ version: '4' })) warehouseId: string,
     @Body('carrier') carrier?: string,
   ) {
     return this.fulfillmentService.createShipment(orderId, warehouseId, carrier);

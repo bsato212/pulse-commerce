@@ -1,24 +1,19 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Query,
-  Param,
-  UsePipes,
-  ValidationPipe,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, Param, UsePipes, ParseUUIDPipe } from '@nestjs/common';
+import { ZodValidationPipe } from 'nestjs-zod';
 import { InventoryService } from './inventory.service';
 import { ReserveStockDto, StockAdjustmentDto } from './dto/inventory.dto';
 import { TenantId } from '../../common/decorators/current-user.decorator';
 
 @Controller('inventory')
-@UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+@UsePipes(new ZodValidationPipe())
 export class InventoryController {
   constructor(private readonly inventoryService: InventoryService) {}
 
   @Get('stocks')
-  async getStocks(@TenantId() tenantId: string, @Query('warehouseId') warehouseId?: string) {
+  async getStocks(
+    @TenantId() tenantId: string,
+    @Query('warehouseId', new ParseUUIDPipe({ version: '4', optional: true })) warehouseId?: string,
+  ) {
     return this.inventoryService.getStocks(tenantId, warehouseId);
   }
 
@@ -38,7 +33,7 @@ export class InventoryController {
   }
 
   @Post('reservations/:id/release')
-  async releaseReservation(@Param('id') id: string) {
+  async releaseReservation(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
     return this.inventoryService.releaseReservation(id);
   }
 }

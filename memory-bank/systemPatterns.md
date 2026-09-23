@@ -70,3 +70,16 @@ pulsecommerce/
     calculateDiscount(context: PromotionContext): number;
   }
   ```
+
+### 7. End-to-End Contract Validation & Schema Safety
+
+- Canonical schemas are authored in `packages/shared-types` using Zod (`z.object(...)`).
+- Backend request DTOs extend `createZodDto(...)` from `nestjs-zod`.
+- Inbound HTTP payloads are validated and parsed through `ZodValidationPipe` globally and on controllers.
+- Route parameters representing database primary/foreign keys (`:id`, `:orderId`, `:warehouseId`) are strictly validated via `ParseUUIDPipe({ version: '4' })` before database queries execute, preventing invalid query syntax.
+
+### 8. Ephemeral Infrastructure Integration Testing
+
+- Hermetic integration testing with Testcontainers (`@testcontainers/postgresql` and `testcontainers` for Valkey 9.0).
+- Automatically provisions real, isolated database and cache instances on demand for test execution with zero static environment prerequisites.
+- Verifies real migrations, multi-tenant query isolation, database constraint integrity, transactions, and live Valkey cache invalidation.

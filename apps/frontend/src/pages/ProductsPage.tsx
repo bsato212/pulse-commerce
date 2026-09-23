@@ -31,7 +31,7 @@ export const ProductsPage: React.FC = () => {
       // Fallback seed catalog
       setProducts([
         {
-          id: 'c0000000-0000-0000-0000-000000000001',
+          id: 'c0000000-0000-4000-8000-000000000001',
           sku: 'AUDIO-ANC-PRO',
           name: 'Pulse ANC Pro Wireless Headphones',
           description: 'Studio-grade noise cancelling wireless headphones with 40h battery life',
@@ -42,7 +42,7 @@ export const ProductsPage: React.FC = () => {
           totalAvailableStock: 333,
         },
         {
-          id: 'c0000000-0000-0000-0000-000000000002',
+          id: 'c0000000-0000-4000-8000-000000000002',
           sku: 'AUDIO-DAC-MINI',
           name: 'Pulse Mini USB-C HiFi DAC',
           description: 'Lossless 32-bit/384kHz digital audio converter',
@@ -53,7 +53,7 @@ export const ProductsPage: React.FC = () => {
           totalAvailableStock: 188,
         },
         {
-          id: 'c0000000-0000-0000-0000-000000000003',
+          id: 'c0000000-0000-4000-8000-000000000003',
           sku: 'FURN-ERGO-CHAIR',
           name: 'ErgoPulse Mesh Desk Chair',
           description: 'High-back lumbar support ergonomic task chair',

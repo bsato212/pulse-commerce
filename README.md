@@ -4,9 +4,11 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue.svg)](https://www.typescriptlang.org/)
 [![NestJS](https://img.shields.io/badge/NestJS-11-red.svg)](https://nestjs.com/)
 [![TypeORM](https://img.shields.io/badge/TypeORM-0.3-orange.svg)](https://typeorm.io/)
+[![Zod](https://img.shields.io/badge/Zod-4.6-blueviolet.svg)](https://zod.dev/)
 [![React](https://img.shields.io/badge/React-19-cyan.svg)](https://react.dev/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-blue.svg)](https://www.postgresql.org/)
 [![Valkey](https://img.shields.io/badge/Valkey-9.0-purple.svg)](https://valkey.io/)
+[![Testcontainers](https://img.shields.io/badge/Testcontainers-12.1-darkgreen.svg)](https://testcontainers.com/)
 
 PulseCommerce is an enterprise-grade Order Management System (OMS) and Multi-Warehouse Inventory Allocation platform. Designed for high-throughput fulfillment, multi-tenant B2B/B2C operations, and event-driven logistics dispatching.
 
@@ -46,6 +48,8 @@ pulsecommerce/
    - Structured JSON logging via Pino with correlation/request ID propagation across services.
 5. **Transactional Outbox Event Pipeline**:
    - Decoupled domain event dispatching for logistics notifications and downstream integration.
+6. **Contract Validation & Schema Safety**:
+   - Monorepo-wide Zod validation schemas enforcing strict UUID and payload integrity at API boundaries.
 
 ---
 
@@ -116,11 +120,14 @@ PulseCommerce includes unit, integration, and end-to-end tests:
 # Run all test suites across workspaces
 npm test
 
-# Run backend unit & integration tests
+# Run backend unit tests
 npm run test --workspace=pulsecommerce-backend
 
 # Run backend e2e tests
 npm run test:e2e --workspace=pulsecommerce-backend
+
+# Run backend integration tests (ephemeral PostgreSQL 18 & Valkey 9.0 via Testcontainers)
+npm run test:integration
 
 # Run frontend component tests
 npm run test --workspace=pulsecommerce-frontend

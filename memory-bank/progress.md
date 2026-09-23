@@ -35,7 +35,8 @@
 ### Testing & Verification
 
 - Jest unit test suites for pricing, caching, inventory, and order processing.
-- Jest end-to-end (e2e) tests for products and order invoice API endpoints.
+- Jest end-to-end (e2e) tests verifying all routes (Products, Orders, Inventory, Fulfillment) and boundary contract validation.
+- Testcontainers integration test suite (`npm run test:integration`) running ephemeral PostgreSQL 18 & Valkey 9.0 containers for migrations, multi-tenant isolation, UUID constraints, transactions, and live cache-aside verification.
 - Vitest component tests for frontend UI and rendering.
 - ESLint 9 and Prettier 3 verification scripts.
 

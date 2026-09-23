@@ -11,6 +11,13 @@
 - **Code Consistency & Hygiene**:
   - All outdated ORM references removed across codebase, configuration, and documentation.
   - ESLint 9 flat configuration and Prettier 3 integrated with zero warnings and zero errors.
+- **Contract & Schema Validation Hardened**:
+  - Monorepo contracts authored with Zod schemas in `@pulsecommerce/shared-types`.
+  - Backend request DTOs extend `createZodDto` with global `ZodValidationPipe` validation.
+  - Strict `ParseUUIDPipe` validation on entity route parameters prevents invalid database queries.
+- **Ephemeral Integration Testing Added**:
+  - Testcontainers pipeline introduced for hermetic PostgreSQL 18 and Valkey 9.0 integration tests (`npm run test:integration`).
+  - Automated verification of migrations, multi-tenant query isolation, database constraint integrity, transactions, and live cache invalidation.
 - **Agent Operating Standards**:
   - `AGENTS.md` established as canonical developer reference for AI agents.
   - `CLAUDE.md` and `GEMINI.md` created to point agents directly to `AGENTS.md`.
