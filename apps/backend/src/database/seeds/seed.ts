@@ -17,6 +17,16 @@ import {
   FulfillmentStatus,
 } from '@pulsecommerce/shared-types';
 
+export const SEED_TENANT_ACME_ID = 'a0000000-0000-0000-0000-000000000001';
+export const SEED_TENANT_OMNI_ID = 'a0000000-0000-0000-0000-000000000002';
+export const SEED_WH_EAST_ID = 'b0000000-0000-0000-0000-000000000001';
+export const SEED_WH_WEST_ID = 'b0000000-0000-0000-0000-000000000002';
+export const SEED_PROD_HEADPHONES_ID = 'c0000000-0000-0000-0000-000000000001';
+export const SEED_PROD_DAC_ID = 'c0000000-0000-0000-0000-000000000002';
+export const SEED_PROD_CHAIR_ID = 'c0000000-0000-0000-0000-000000000003';
+export const SEED_ORDER_1_ID = 'd0000000-0000-0000-0000-000000000001';
+export const SEED_ORDER_2_ID = 'd0000000-0000-0000-0000-000000000002';
+
 async function seed() {
   console.log('🌱 Starting TypeORM Database Initialization & Seeding for PulseCommerce...');
 
@@ -51,6 +61,7 @@ async function seed() {
   let tenantAcme = await tenantRepo.findOne({ where: { slug: 'acme-corp' } });
   if (!tenantAcme) {
     tenantAcme = tenantRepo.create({
+      id: SEED_TENANT_ACME_ID,
       slug: 'acme-corp',
       name: 'Acme Retail Corp',
       plan: 'ENTERPRISE',
@@ -61,6 +72,7 @@ async function seed() {
   let tenantOmni = await tenantRepo.findOne({ where: { slug: 'omni-trade' } });
   if (!tenantOmni) {
     tenantOmni = tenantRepo.create({
+      id: SEED_TENANT_OMNI_ID,
       slug: 'omni-trade',
       name: 'OmniTrade Global',
       plan: 'ENTERPRISE',
@@ -267,6 +279,44 @@ async function seed() {
       ],
     });
     await orderRepo.save(order1);
+  }
+
+  let order2 = await orderRepo.findOne({ where: { orderNumber: 'ORD-2026-1002' } });
+  if (!order2) {
+    order2 = orderRepo.create({
+      tenantId: tenantAcme.id,
+      customerId: userCustomer.id,
+      orderNumber: 'ORD-2026-1002',
+      customerEmail: userCustomer.email,
+      status: OrderStatus.PENDING,
+      paymentStatus: PaymentStatus.AUTHORIZED,
+      fulfillmentStatus: FulfillmentStatus.UNFULFILLED,
+      subtotal: 450.0,
+      discountTotal: 0.0,
+      taxTotal: 38.25,
+      shippingTotal: 45.0,
+      grandTotal: 533.25,
+      currency: 'USD',
+      shippingAddress: {
+        street: '100 Main Street',
+        city: 'Portland',
+        state: 'OR',
+        postalCode: '97201',
+        country: 'USA',
+      },
+      items: [
+        {
+          productId: prodChair.id,
+          sku: prodChair.sku,
+          productName: prodChair.name,
+          unitPrice: 450.0,
+          quantity: 1,
+          discount: 0,
+          subtotal: 450.0,
+        } as OrderItem,
+      ],
+    });
+    await orderRepo.save(order2);
   }
 
   // 8. Webhook Subscriptions

@@ -17,17 +17,27 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    const status =
+    let status =
       exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
 
     const exceptionResponse = exception instanceof HttpException ? exception.getResponse() : null;
 
-    const message =
+    let message =
       typeof exceptionResponse === 'object' && exceptionResponse !== null
         ? (exceptionResponse as any).message || (exceptionResponse as any).error
         : exception instanceof Error
           ? exception.message
           : 'Internal server error';
+
+    // Intercept PostgreSQL invalid UUID format / type syntax errors (code 22P02)
+    const errObj = exception as any;
+    if (
+      errObj?.code === '22P02' ||
+      (typeof message === 'string' && message.includes('invalid input syntax for type uuid'))
+    ) {
+      status = HttpStatus.BAD_REQUEST;
+      message = 'Invalid identifier syntax: expected valid UUID format';
+    }
 
     const errorBody = {
       statusCode: status,

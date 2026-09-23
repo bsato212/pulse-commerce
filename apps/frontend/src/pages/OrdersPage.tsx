@@ -45,7 +45,7 @@ export const OrdersPage: React.FC = () => {
       // Fallback seed orders if backend is not currently running
       setOrders([
         {
-          id: 'ord-seed-1',
+          id: 'd0000000-0000-0000-0000-000000000001',
           orderNumber: 'ORD-2026-1001',
           customerEmail: 'jane.smith@example.com',
           status: 'CONFIRMED',
@@ -60,7 +60,7 @@ export const OrdersPage: React.FC = () => {
           createdAt: new Date().toISOString(),
           items: [
             {
-              id: 'item-1',
+              id: 'e0000000-0000-0000-0000-000000000001',
               sku: 'AUDIO-ANC-PRO',
               productName: 'Pulse ANC Pro Wireless Headphones',
               unitPrice: 299.99,
@@ -68,7 +68,7 @@ export const OrdersPage: React.FC = () => {
               subtotal: 279.99,
             },
             {
-              id: 'item-2',
+              id: 'e0000000-0000-0000-0000-000000000002',
               sku: 'AUDIO-DAC-MINI',
               productName: 'Pulse Mini USB-C HiFi DAC',
               unitPrice: 89.5,
@@ -78,8 +78,9 @@ export const OrdersPage: React.FC = () => {
           ],
         },
         {
-          id: 'ord-seed-2',
+          id: 'd0000000-0000-0000-0000-000000000002',
           orderNumber: 'ORD-2026-1002',
+
           customerEmail: 'jane.smith@example.com',
           status: 'PENDING',
           fulfillmentStatus: 'UNFULFILLED',
