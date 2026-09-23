@@ -1,5 +1,5 @@
-# Base builder
-FROM node:24-alpine AS builder
+# Development & base builder stage
+FROM node:24-alpine AS dev
 
 WORKDIR /app
 
@@ -8,7 +8,7 @@ COPY package*.json ./
 COPY packages/shared-types/package*.json ./packages/shared-types/
 COPY apps/backend/package*.json ./apps/backend/
 
-# Install dependencies
+# Install dependencies (including devDependencies for ts-node and nest cli)
 RUN npm ci
 
 # Copy source code
@@ -18,7 +18,15 @@ COPY apps/backend ./apps/backend
 # Build shared package
 RUN npm run build --workspace=@pulsecommerce/shared-types
 
-# Build backend
+WORKDIR /app/apps/backend
+
+EXPOSE 3000
+
+CMD ["sh", "-c", "npm run db:seed && npm run start:dev"]
+
+# Production builder
+FROM dev AS builder
+
 WORKDIR /app/apps/backend
 RUN npm run build
 

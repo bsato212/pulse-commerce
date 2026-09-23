@@ -1,5 +1,5 @@
-# Build stage
-FROM node:24-alpine AS builder
+# Development & base builder stage
+FROM node:24-alpine AS dev
 
 WORKDIR /app
 
@@ -10,9 +10,18 @@ COPY apps/frontend/package*.json ./apps/frontend/
 RUN npm ci
 
 COPY packages/shared-types ./packages/shared-types
+RUN npm run build --workspace=@pulsecommerce/shared-types
+
 COPY apps/frontend ./apps/frontend
 
-RUN npm run build --workspace=@pulsecommerce/shared-types
+WORKDIR /app/apps/frontend
+
+EXPOSE 5173
+
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"]
+
+# Production builder
+FROM dev AS builder
 
 WORKDIR /app/apps/frontend
 RUN npm run build
