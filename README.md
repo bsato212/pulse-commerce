@@ -128,12 +128,13 @@ npm run test --workspace=pulsecommerce-frontend
 
 ---
 
-## Production Deployment with Docker
+## Full-Stack Docker Setup (Local Dev)
 
-To build and run all services in production mode:
+To build and run all services with live logs streaming directly in your terminal:
 
 ```bash
-docker compose up --build -d
+npm run docker:up
+# or: docker compose up --build
 ```
 
 Services:

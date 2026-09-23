@@ -106,11 +106,12 @@ npm run db:seed --workspace=pulsecommerce-backend
 ### Infrastructure (Docker)
 
 ```bash
-# Start PostgreSQL 18 and Valkey 9.0
+# Start PostgreSQL 18 and Valkey 9.0 only (in background)
 docker compose up -d postgres valkey
 
-# Start the full stack with production builds
-docker compose up --build -d
+# Start the full stack with live logs streaming (local dev)
+npm run docker:up
+# or: docker compose up --build
 ```
 
 ---

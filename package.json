@@ -18,7 +18,7 @@
     "dev": "concurrently -n \"backend,frontend\" -c \"blue,green\" \"npm run start:dev --workspace=pulsecommerce-backend\" \"npm run dev --workspace=pulsecommerce-frontend\"",
     "db:migrate": "npm run migration:run --workspace=pulsecommerce-backend",
     "db:seed": "npm run db:seed --workspace=pulsecommerce-backend",
-    "docker:up": "docker compose up --build -d",
+    "docker:up": "docker compose up --build",
     "docker:down": "docker compose down",
     "docker:logs": "docker compose logs -f"
   },
