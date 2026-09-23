@@ -12,8 +12,8 @@
   - All outdated ORM references removed across codebase, configuration, and documentation.
   - ESLint 9 flat configuration and Prettier 3 integrated with zero warnings and zero errors.
 - **Agent Operating Standards**:
-  - `agents.md` established as canonical developer reference for AI agents.
-  - `claude.md` and `gemini.md` created to point agents directly to `agents.md`.
+  - `AGENTS.md` established as canonical developer reference for AI agents.
+  - `CLAUDE.md` and `GEMINI.md` created to point agents directly to `AGENTS.md`.
   - `memory-bank/` directory initialized for structured context preservation.
 
 ## Active Decisions & Considerations
