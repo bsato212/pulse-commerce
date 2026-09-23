@@ -10,3 +10,4 @@ export * from './order-item.entity';
 export * from './shipment.entity';
 export * from './outbox-event.entity';
 export * from './webhook-subscription.entity';
+export * from './numeric-transformer';

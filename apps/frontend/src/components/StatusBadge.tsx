@@ -6,7 +6,7 @@ interface StatusBadgeProps {
 
 export const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
   const getColors = () => {
-    switch (status.toUpperCase()) {
+    switch ((status || '').toUpperCase()) {
       case 'CONFIRMED':
       case 'PAID':
       case 'FULFILLED':

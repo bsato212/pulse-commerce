@@ -13,6 +13,7 @@ import { User } from './user.entity';
 import { OrderItem } from './order-item.entity';
 import { Shipment } from './shipment.entity';
 import { OrderStatus, PaymentStatus, FulfillmentStatus } from '@pulsecommerce/shared-types';
+import { ColumnNumericTransformer } from './numeric-transformer';
 
 @Entity('orders')
 export class Order {
@@ -52,19 +53,37 @@ export class Order {
   })
   fulfillmentStatus: FulfillmentStatus;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  @Column({ type: 'decimal', precision: 10, scale: 2, transformer: new ColumnNumericTransformer() })
   subtotal: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    default: 0,
+    transformer: new ColumnNumericTransformer(),
+  })
   discountTotal: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    default: 0,
+    transformer: new ColumnNumericTransformer(),
+  })
   taxTotal: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    default: 0,
+    transformer: new ColumnNumericTransformer(),
+  })
   shippingTotal: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  @Column({ type: 'decimal', precision: 10, scale: 2, transformer: new ColumnNumericTransformer() })
   grandTotal: number;
 
   @Column({ default: 'USD' })

@@ -11,6 +11,7 @@ import {
 import { Category } from './category.entity';
 import { WarehouseStock } from './warehouse-stock.entity';
 import { OrderItem } from './order-item.entity';
+import { ColumnNumericTransformer } from './numeric-transformer';
 
 @Entity('products')
 export class Product {
@@ -26,10 +27,16 @@ export class Product {
   @Column({ type: 'text' })
   description: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  @Column({ type: 'decimal', precision: 10, scale: 2, transformer: new ColumnNumericTransformer() })
   price: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    default: 0,
+    transformer: new ColumnNumericTransformer(),
+  })
   costPrice: number;
 
   @Column()

@@ -224,7 +224,7 @@ export const OrdersPage: React.FC = () => {
                       <span className="text-slate-400">{order.fulfillmentStatus}</span>
                     </td>
                     <td className="py-3.5 px-4 text-right font-medium text-white">
-                      ${order.grandTotal.toFixed(2)}
+                      ${Number(order.grandTotal ?? 0).toFixed(2)}
                     </td>
                     <td className="py-3.5 px-4 text-center">
                       <div className="flex items-center justify-center space-x-2">
@@ -315,7 +315,9 @@ export const OrdersPage: React.FC = () => {
                       <td className="p-2 font-mono text-slate-400">{item.sku}</td>
                       <td className="p-2 font-medium">{item.name}</td>
                       <td className="p-2 text-right">{item.quantity}</td>
-                      <td className="p-2 text-right font-medium">${item.total.toFixed(2)}</td>
+                      <td className="p-2 text-right font-medium">
+                        ${Number(item.total ?? 0).toFixed(2)}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -325,23 +327,23 @@ export const OrdersPage: React.FC = () => {
             <div className="space-y-1 text-xs text-slate-300 pt-2 border-t border-slate-800">
               <div className="flex justify-between">
                 <span>Subtotal:</span>
-                <span>${invoiceModal.pricing?.subtotal?.toFixed(2)}</span>
+                <span>${Number(invoiceModal.pricing?.subtotal ?? 0).toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-emerald-400">
                 <span>Discount:</span>
-                <span>-${invoiceModal.pricing?.discount?.toFixed(2)}</span>
+                <span>-${Number(invoiceModal.pricing?.discount ?? 0).toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Tax:</span>
-                <span>${invoiceModal.pricing?.tax?.toFixed(2)}</span>
+                <span>${Number(invoiceModal.pricing?.tax ?? 0).toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Shipping:</span>
-                <span>${invoiceModal.pricing?.shipping?.toFixed(2)}</span>
+                <span>${Number(invoiceModal.pricing?.shipping ?? 0).toFixed(2)}</span>
               </div>
               <div className="flex justify-between font-bold text-white text-sm pt-1 border-t border-slate-800">
                 <span>Grand Total:</span>
-                <span>${invoiceModal.pricing?.grandTotal?.toFixed(2)} USD</span>
+                <span>${Number(invoiceModal.pricing?.grandTotal ?? 0).toFixed(2)} USD</span>
               </div>
             </div>
 

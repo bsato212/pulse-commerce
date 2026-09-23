@@ -7,6 +7,7 @@ import { OrdersPage } from './pages/OrdersPage';
 import { InventoryPage } from './pages/InventoryPage';
 import { ProductsPage } from './pages/ProductsPage';
 import { ExtensionHooksPage } from './pages/ExtensionHooksPage';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,16 +28,18 @@ export const AppContent: React.FC = () => {
         <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
         <main className="flex-1 overflow-y-auto p-8">
           <div className="max-w-7xl mx-auto">
-            {activeTab === 'dashboard' && (
-              <DashboardPage
-                onNavigateOrders={() => setActiveTab('orders')}
-                onNavigateInventory={() => setActiveTab('inventory')}
-              />
-            )}
-            {activeTab === 'orders' && <OrdersPage />}
-            {activeTab === 'inventory' && <InventoryPage />}
-            {activeTab === 'products' && <ProductsPage />}
-            {activeTab === 'extensions' && <ExtensionHooksPage />}
+            <ErrorBoundary>
+              {activeTab === 'dashboard' && (
+                <DashboardPage
+                  onNavigateOrders={() => setActiveTab('orders')}
+                  onNavigateInventory={() => setActiveTab('inventory')}
+                />
+              )}
+              {activeTab === 'orders' && <OrdersPage />}
+              {activeTab === 'inventory' && <InventoryPage />}
+              {activeTab === 'products' && <ProductsPage />}
+              {activeTab === 'extensions' && <ExtensionHooksPage />}
+            </ErrorBoundary>
           </div>
         </main>
       </div>

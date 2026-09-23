@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { Order } from './order.entity';
 import { Product } from './product.entity';
+import { ColumnNumericTransformer } from './numeric-transformer';
 
 @Entity('order_items')
 export class OrderItem {
@@ -19,16 +20,22 @@ export class OrderItem {
   @Column()
   productName: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  @Column({ type: 'decimal', precision: 10, scale: 2, transformer: new ColumnNumericTransformer() })
   unitPrice: number;
 
   @Column()
   quantity: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    default: 0,
+    transformer: new ColumnNumericTransformer(),
+  })
   discount: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  @Column({ type: 'decimal', precision: 10, scale: 2, transformer: new ColumnNumericTransformer() })
   subtotal: number;
 
   @ManyToOne(() => Order, (order) => order.items, { onDelete: 'CASCADE' })

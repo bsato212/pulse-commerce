@@ -148,9 +148,11 @@ export const ProductsPage: React.FC = () => {
             <div className="mt-6 pt-4 border-t border-slate-700/60 flex items-center justify-between">
               <div>
                 <span className="text-xs text-slate-400 block">Unit Price</span>
-                <span className="text-xl font-bold text-white">${product.price.toFixed(2)}</span>
+                <span className="text-xl font-bold text-white">
+                  ${Number(product.price ?? 0).toFixed(2)}
+                </span>
                 <span className="text-[10px] text-slate-500 block">
-                  Cost: ${product.costPrice.toFixed(2)}
+                  Cost: ${Number(product.costPrice ?? 0).toFixed(2)}
                 </span>
               </div>
 

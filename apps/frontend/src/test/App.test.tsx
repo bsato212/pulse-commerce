@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import App from '../App';
 import { StatusBadge } from '../components/StatusBadge';
@@ -26,5 +26,14 @@ describe('PulseCommerce Frontend Application', () => {
 
     rerender(<StatusBadge status="CANCELLED" />);
     expect(screen.getByText('CANCELLED')).toBeInTheDocument();
+  });
+
+  it('renders orders page without crashing on numeric strings', async () => {
+    const { OrdersPage } = await import('../pages/OrdersPage');
+    render(<OrdersPage />);
+    expect(screen.getByText('Orders & Fulfillment')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('ORD-2026-1001')).toBeInTheDocument();
+    });
   });
 });
