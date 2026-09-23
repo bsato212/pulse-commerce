@@ -1,5 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PromotionContext, PromotionDiscountResult, PromotionRuleStrategy } from './promotion-rule.interface';
+import {
+  PromotionContext,
+  PromotionDiscountResult,
+  PromotionRuleStrategy,
+} from './promotion-rule.interface';
 
 @Injectable()
 export class PromotionEngineService {
@@ -9,7 +13,9 @@ export class PromotionEngineService {
   registerRule(rule: PromotionRuleStrategy) {
     this.registeredRules.push(rule);
     this.registeredRules.sort((a, b) => b.priority - a.priority);
-    this.logger.log(`Registered promotion rule strategy: ${rule.code} (priority: ${rule.priority})`);
+    this.logger.log(
+      `Registered promotion rule strategy: ${rule.code} (priority: ${rule.priority})`,
+    );
   }
 
   async calculatePromotions(context: PromotionContext): Promise<PromotionDiscountResult[]> {

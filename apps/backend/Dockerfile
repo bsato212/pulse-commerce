@@ -1,5 +1,5 @@
 # Base builder
-FROM node:22-alpine AS builder
+FROM node:24-alpine AS builder
 
 WORKDIR /app
 
@@ -18,13 +18,12 @@ COPY apps/backend ./apps/backend
 # Build shared package
 RUN npm run build --workspace=@pulsecommerce/shared-types
 
-# Generate Prisma client and build backend
+# Build backend
 WORKDIR /app/apps/backend
-RUN npx prisma generate
 RUN npm run build
 
 # Production runner
-FROM node:22-alpine AS runner
+FROM node:24-alpine AS runner
 
 WORKDIR /app
 
@@ -37,15 +36,12 @@ COPY apps/backend/package*.json ./apps/backend/
 
 RUN npm ci --omit=dev
 
-# Copy generated prisma client and dist files
+# Copy compiled dist files
 COPY --from=builder /app/packages/shared-types/dist ./packages/shared-types/dist
 COPY --from=builder /app/apps/backend/dist ./apps/backend/dist
-COPY --from=builder /app/apps/backend/prisma ./apps/backend/prisma
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 
 WORKDIR /app/apps/backend
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/src/main"]
+CMD ["sh", "-c", "node dist/src/main"]

@@ -1,7 +1,9 @@
 # PulseCommerce
 
+[![Node.js](https://img.shields.io/badge/Node.js-24-green.svg)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue.svg)](https://www.typescriptlang.org/)
 [![NestJS](https://img.shields.io/badge/NestJS-11-red.svg)](https://nestjs.com/)
+[![TypeORM](https://img.shields.io/badge/TypeORM-0.3-orange.svg)](https://typeorm.io/)
 [![React](https://img.shields.io/badge/React-19-cyan.svg)](https://react.dev/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue.svg)](https://www.postgresql.org/)
 [![Valkey](https://img.shields.io/badge/Valkey-8.0-purple.svg)](https://valkey.io/)
@@ -15,14 +17,14 @@ PulseCommerce is an enterprise-grade Order Management System (OMS) and Multi-War
 ```
 pulsecommerce/
 ├── apps/
-│   ├── backend/           # NestJS 11 + Prisma ORM + Valkey Caching + Pino Logger
+│   ├── backend/           # NestJS 11 + TypeORM 0.3 + Valkey Caching + Pino Logger (Node 24)
 │   │   ├── src/
 │   │   │   ├── common/    # Pino logger, filters, interceptors, auth guards
 │   │   │   ├── cache/     # Valkey cache-aside service with TTL invalidation
-│   │   │   ├── database/  # PrismaService and transaction management
-│   │   │   └── modules/   # Orders, Inventory, Products, Fulfillment
+│   │   │   ├── database/  # TypeORM entities, data source, migrations, and seeds
+│   │   │   └── modules/   # Orders, Inventory, Products, Fulfillment, Webhooks
 │   │   └── test/          # Jest unit, integration, and e2e test suites
-│   └── frontend/          # React 19 + Vite + Tailwind CSS + TanStack Query
+│   └── frontend/          # React 19 + Vite + Tailwind CSS + TanStack Query (Node 24)
 │       └── src/           # Real-time dashboard, orders, inventory, products
 └── packages/
     └── shared-types/      # Shared DTO contracts, enums, and API interfaces
@@ -50,35 +52,59 @@ pulsecommerce/
 ## Quickstart
 
 ### Prerequisites
-- Node.js >= 20
+
+- Node.js >= 24
 - Docker & Docker Compose
-- npm or pnpm
+- npm
 
 ### 1. Start Infrastructure with Docker
+
 ```bash
 docker compose up -d postgres valkey
 ```
 
 ### 2. Install Dependencies & Build Packages
+
 ```bash
 npm install
 npm run build
 ```
 
 ### 3. Run Database Migrations & Seed Data
+
 ```bash
-cd apps/backend
-npx prisma migrate deploy
-npm run seed
-cd ../..
+# Execute TypeORM migrations
+npm run db:migrate --workspace=pulsecommerce-backend
+
+# Populate initial multi-tenant seed data
+npm run db:seed --workspace=pulsecommerce-backend
 ```
 
 ### 4. Start Development Servers
+
 ```bash
 npm run dev
 ```
-- Backend API & Swagger: `http://localhost:3000/api/docs`
+
+- Backend API: `http://localhost:3000/api/v1`
 - Frontend Dashboard: `http://localhost:5173`
+
+---
+
+## Code Quality & Linting
+
+The repository is configured with ESLint 9 (flat config) and Prettier:
+
+```bash
+# Lint all workspaces
+npm run lint
+
+# Check formatting
+npm run format:check
+
+# Auto-format all files
+npm run format
+```
 
 ---
 
@@ -91,13 +117,13 @@ PulseCommerce includes unit, integration, and end-to-end tests:
 npm test
 
 # Run backend unit & integration tests
-npm run test --workspace=backend
+npm run test --workspace=pulsecommerce-backend
 
 # Run backend e2e tests
-npm run test:e2e --workspace=backend
+npm run test:e2e --workspace=pulsecommerce-backend
 
 # Run frontend component tests
-npm run test --workspace=frontend
+npm run test --workspace=pulsecommerce-frontend
 ```
 
 ---
@@ -105,11 +131,14 @@ npm run test --workspace=frontend
 ## Production Deployment with Docker
 
 To build and run all services in production mode:
+
 ```bash
 docker compose up --build -d
 ```
+
 Services:
-- **Frontend**: `http://localhost:5173` (served via production bundle)
+
+- **Frontend**: `http://localhost:5173` (served via production Nginx bundle)
 - **Backend**: `http://localhost:3000`
 - **Postgres**: `localhost:5432`
 - **Valkey**: `localhost:6379`

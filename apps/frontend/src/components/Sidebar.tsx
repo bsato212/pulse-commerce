@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  LayoutDashboard,
-  ShoppingCart,
-  Boxes,
-  Package,
-  Layers,
-  Sparkles,
-} from 'lucide-react';
+import { LayoutDashboard, ShoppingCart, Boxes, Package, Layers, Sparkles } from 'lucide-react';
 
 export type ActiveTab = 'dashboard' | 'orders' | 'inventory' | 'products' | 'extensions';
 

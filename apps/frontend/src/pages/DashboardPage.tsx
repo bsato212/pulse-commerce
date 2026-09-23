@@ -1,14 +1,7 @@
 import React from 'react';
 import { StatCard } from '../components/StatCard';
 import { StatusBadge } from '../components/StatusBadge';
-import {
-  TrendingUp,
-  PackageCheck,
-  AlertTriangle,
-  Clock,
-  ArrowUpRight,
-  Truck,
-} from 'lucide-react';
+import { TrendingUp, PackageCheck, AlertTriangle, Clock, ArrowUpRight, Truck } from 'lucide-react';
 
 interface DashboardPageProps {
   onNavigateOrders: () => void;
@@ -24,7 +17,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
       {/* Top Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 bg-gradient-to-r from-indigo-950/60 to-slate-900 border border-indigo-900/40 rounded-2xl">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Operations Command Center</h1>
+          <h1 className="text-2xl font-bold text-white tracking-tight">
+            Operations Command Center
+          </h1>
           <p className="text-sm text-slate-400 mt-1">
             Real-time fulfillment metrics, multi-warehouse routing, and active dispatch pipeline.
           </p>
@@ -83,7 +78,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-base font-semibold text-white">Live Fulfillment Stream</h2>
-              <p className="text-xs text-slate-400">Latest orders routed through allocation engine</p>
+              <p className="text-xs text-slate-400">
+                Latest orders routed through allocation engine
+              </p>
             </div>
             <button
               onClick={onNavigateOrders}

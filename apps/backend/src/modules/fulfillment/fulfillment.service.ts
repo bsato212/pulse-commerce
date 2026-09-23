@@ -1,21 +1,35 @@
 import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
-import { PrismaService } from '../../database/prisma.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, DataSource } from 'typeorm';
+import { Shipment, Order, Warehouse, OutboxEvent } from '../../database/entities';
 import { CarrierRegistryService } from './carriers/carrier-registry.service';
-import { OrderStatus, FulfillmentStatus } from '@prisma/client';
+import { OrderStatus, FulfillmentStatus } from '@pulsecommerce/shared-types';
 
 @Injectable()
 export class FulfillmentService {
   private readonly logger = new Logger(FulfillmentService.name);
 
   constructor(
-    private readonly prisma: PrismaService,
+    @InjectRepository(Shipment)
+    private readonly shipmentRepo: Repository<Shipment>,
+    @InjectRepository(Order)
+    private readonly orderRepo: Repository<Order>,
+    @InjectRepository(Warehouse)
+    private readonly warehouseRepo: Repository<Warehouse>,
+    @InjectRepository(OutboxEvent)
+    private readonly outboxRepo: Repository<OutboxEvent>,
     private readonly carrierRegistry: CarrierRegistryService,
+    private readonly dataSource: DataSource,
   ) {}
 
-  async createShipment(orderId: string, warehouseId: string, carrierCode: string = 'INTERNAL_FLEET') {
-    const order = await this.prisma.order.findUnique({
+  async createShipment(
+    orderId: string,
+    warehouseId: string,
+    carrierCode: string = 'INTERNAL_FLEET',
+  ) {
+    const order = await this.orderRepo.findOne({
       where: { id: orderId },
-      include: { items: true, customer: true },
+      relations: ['items', 'customer'],
     });
 
     if (!order) {
@@ -23,10 +37,12 @@ export class FulfillmentService {
     }
 
     if (order.status !== OrderStatus.CONFIRMED && order.status !== OrderStatus.ALLOCATING) {
-      throw new BadRequestException(`Order ${orderId} cannot be fulfilled in status ${order.status}`);
+      throw new BadRequestException(
+        `Order ${orderId} cannot be fulfilled in status ${order.status}`,
+      );
     }
 
-    const warehouse = await this.prisma.warehouse.findUnique({
+    const warehouse = await this.warehouseRepo.findOne({
       where: { id: warehouseId },
     });
 
@@ -48,61 +64,50 @@ export class FulfillmentService {
       items: order.items.map((i) => ({ sku: i.sku, quantity: i.quantity })),
     });
 
-    const shipment = await this.prisma.$transaction(async (tx) => {
-      const created = await tx.shipment.create({
-        data: {
+    const shipment = await this.dataSource.transaction(async (manager) => {
+      const created = manager.create(Shipment, {
+        orderId: order.id,
+        warehouseId,
+        carrier: carrier.carrierCode,
+        trackingNumber: booking.trackingNumber,
+        labelUrl: booking.labelUrl,
+        status: 'SHIPPED',
+        shippedAt: new Date(),
+      });
+      const savedShipment = await manager.save(Shipment, created);
+
+      order.status = OrderStatus.SHIPPED;
+      order.fulfillmentStatus = FulfillmentStatus.FULFILLED;
+      await manager.save(Order, order);
+
+      const outbox = manager.create(OutboxEvent, {
+        eventType: 'order.shipped',
+        aggregateId: order.id,
+        payload: {
           orderId: order.id,
-          warehouseId,
-          carrier: carrier.carrierCode,
+          shipmentId: savedShipment.id,
           trackingNumber: booking.trackingNumber,
-          labelUrl: booking.labelUrl,
-          status: 'SHIPPED',
-          shippedAt: new Date(),
+          carrier: carrier.carrierCode,
         },
       });
+      await manager.save(OutboxEvent, outbox);
 
-      await tx.order.update({
-        where: { id: order.id },
-        data: {
-          status: OrderStatus.SHIPPED,
-          fulfillmentStatus: FulfillmentStatus.FULFILLED,
-        },
-      });
-
-      await tx.outboxEvent.create({
-        data: {
-          eventType: 'order.shipped',
-          aggregateId: order.id,
-          payload: {
-            orderId: order.id,
-            shipmentId: created.id,
-            trackingNumber: booking.trackingNumber,
-            carrier: carrier.carrierCode,
-          },
-        },
-      });
-
-      return created;
+      return savedShipment;
     });
 
-    this.logger.log(`Created shipment ${shipment.id} for order ${order.orderNumber} via ${carrierCode}`);
+    this.logger.log(
+      `Created shipment ${shipment.id} for order ${order.orderNumber} via ${carrierCode}`,
+    );
     return shipment;
   }
 
   async getShipments(tenantId: string) {
-    return this.prisma.shipment.findMany({
-      where: {
-        order: { tenantId },
-      },
-      include: {
-        order: {
-          select: { orderNumber: true, customerEmail: true },
-        },
-        warehouse: {
-          select: { code: true, name: true },
-        },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+    return this.shipmentRepo
+      .createQueryBuilder('shipment')
+      .innerJoinAndSelect('shipment.order', 'order')
+      .innerJoinAndSelect('shipment.warehouse', 'warehouse')
+      .where('order.tenantId = :tenantId', { tenantId })
+      .orderBy('shipment.createdAt', 'DESC')
+      .getMany();
   }
 }

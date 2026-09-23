@@ -18,19 +18,16 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
 
     const status =
-      exception instanceof HttpException
-        ? exception.getStatus()
-        : HttpStatus.INTERNAL_SERVER_ERROR;
+      exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    const exceptionResponse =
-      exception instanceof HttpException ? exception.getResponse() : null;
+    const exceptionResponse = exception instanceof HttpException ? exception.getResponse() : null;
 
     const message =
       typeof exceptionResponse === 'object' && exceptionResponse !== null
         ? (exceptionResponse as any).message || (exceptionResponse as any).error
         : exception instanceof Error
-        ? exception.message
-        : 'Internal server error';
+          ? exception.message
+          : 'Internal server error';
 
     const errorBody = {
       statusCode: status,
@@ -47,7 +44,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
         exception instanceof Error ? exception.stack : undefined,
       );
     } else {
-      this.logger.warn(`HTTP ${status} on ${request.method} ${request.url}: ${JSON.stringify(message)}`);
+      this.logger.warn(
+        `HTTP ${status} on ${request.method} ${request.url}: ${JSON.stringify(message)}`,
+      );
     }
 
     response.status(status).json(errorBody);

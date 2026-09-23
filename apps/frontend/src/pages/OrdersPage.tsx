@@ -1,14 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StatusBadge } from '../components/StatusBadge';
 import { fetchApi } from '../api/client';
-import {
-  FileText,
-  Search,
-  CheckCircle2,
-  AlertCircle,
-  Truck,
-  PlusCircle,
-} from 'lucide-react';
+import { FileText, Truck } from 'lucide-react';
 
 interface OrderItem {
   id: string;
@@ -38,7 +31,6 @@ interface Order {
 
 export const OrdersPage: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
   const [invoiceModal, setInvoiceModal] = useState<any | null>(null);
@@ -60,9 +52,9 @@ export const OrdersPage: React.FC = () => {
           fulfillmentStatus: 'PARTIALLY_FULFILLED',
           paymentStatus: 'PAID',
           subtotal: 389.49,
-          discountTotal: 25.00,
+          discountTotal: 25.0,
           taxTotal: 29.16,
-          shippingTotal: 15.00,
+          shippingTotal: 15.0,
           grandTotal: 408.65,
           currency: 'USD',
           createdAt: new Date().toISOString(),
@@ -79,9 +71,9 @@ export const OrdersPage: React.FC = () => {
               id: 'item-2',
               sku: 'AUDIO-DAC-MINI',
               productName: 'Pulse Mini USB-C HiFi DAC',
-              unitPrice: 89.50,
+              unitPrice: 89.5,
               quantity: 1,
-              subtotal: 84.50,
+              subtotal: 84.5,
             },
           ],
         },
@@ -92,10 +84,10 @@ export const OrdersPage: React.FC = () => {
           status: 'PENDING',
           fulfillmentStatus: 'UNFULFILLED',
           paymentStatus: 'AUTHORIZED',
-          subtotal: 450.00,
-          discountTotal: 0.00,
+          subtotal: 450.0,
+          discountTotal: 0.0,
           taxTotal: 38.25,
-          shippingTotal: 45.00,
+          shippingTotal: 45.0,
           grandTotal: 533.25,
           currency: 'USD',
           createdAt: new Date().toISOString(),
@@ -104,9 +96,9 @@ export const OrdersPage: React.FC = () => {
               id: 'item-3',
               sku: 'FURN-ERGO-CHAIR',
               productName: 'ErgoPulse Mesh Desk Chair',
-              unitPrice: 450.00,
+              unitPrice: 450.0,
               quantity: 1,
-              subtotal: 450.00,
+              subtotal: 450.0,
             },
           ],
         },
@@ -181,7 +173,10 @@ export const OrdersPage: React.FC = () => {
       {actionMessage && (
         <div className="p-3 rounded-lg bg-indigo-900/40 border border-indigo-700/60 text-xs text-indigo-300 flex items-center justify-between">
           <span>{actionMessage}</span>
-          <button onClick={() => setActionMessage(null)} className="text-indigo-200 hover:underline">
+          <button
+            onClick={() => setActionMessage(null)}
+            className="text-indigo-200 hover:underline"
+          >
             Dismiss
           </button>
         </div>
@@ -220,9 +215,7 @@ export const OrdersPage: React.FC = () => {
                     <td className="py-3.5 px-4 font-mono font-medium text-white text-xs">
                       {order.orderNumber}
                     </td>
-                    <td className="py-3.5 px-4 text-xs text-slate-300">
-                      {order.customerEmail}
-                    </td>
+                    <td className="py-3.5 px-4 text-xs text-slate-300">{order.customerEmail}</td>
                     <td className="py-3.5 px-4">
                       <StatusBadge status={order.status} />
                     </td>
@@ -283,7 +276,9 @@ export const OrdersPage: React.FC = () => {
             <div className="flex justify-between items-start border-b border-slate-800 pb-3">
               <div>
                 <h3 className="font-bold text-lg text-white">{invoiceModal.invoiceNumber}</h3>
-                <p className="text-xs text-slate-400">Date: {new Date(invoiceModal.date).toLocaleDateString()}</p>
+                <p className="text-xs text-slate-400">
+                  Date: {new Date(invoiceModal.date).toLocaleDateString()}
+                </p>
               </div>
               <button
                 onClick={() => setInvoiceModal(null)}
@@ -294,8 +289,13 @@ export const OrdersPage: React.FC = () => {
             </div>
 
             <div className="text-xs space-y-1 text-slate-300">
-              <p><strong>Tenant:</strong> {invoiceModal.tenant?.name}</p>
-              <p><strong>Customer:</strong> {invoiceModal.customer?.name} ({invoiceModal.customer?.email})</p>
+              <p>
+                <strong>Tenant:</strong> {invoiceModal.tenant?.name}
+              </p>
+              <p>
+                <strong>Customer:</strong> {invoiceModal.customer?.name} (
+                {invoiceModal.customer?.email})
+              </p>
             </div>
 
             <div className="border border-slate-800 rounded-lg overflow-hidden">

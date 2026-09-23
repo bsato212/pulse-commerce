@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { fetchApi } from '../api/client';
-import { Boxes, Plus, AlertCircle, RefreshCw } from 'lucide-react';
+import { AlertCircle, RefreshCw } from 'lucide-react';
 
 interface WarehouseStock {
   id: string;
@@ -148,7 +148,9 @@ export const InventoryPage: React.FC = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Multi-Warehouse Inventory</h1>
+          <h1 className="text-2xl font-bold text-white tracking-tight">
+            Multi-Warehouse Inventory
+          </h1>
           <p className="text-sm text-slate-400 mt-1">
             Real-time stock balancing, reservation hold states, and cycle count adjustments.
           </p>
@@ -166,7 +168,10 @@ export const InventoryPage: React.FC = () => {
       {notification && (
         <div className="p-3 rounded-lg bg-emerald-950/60 border border-emerald-800/80 text-xs text-emerald-300 flex items-center justify-between">
           <span>{notification}</span>
-          <button onClick={() => setNotification(null)} className="text-emerald-200 hover:underline">
+          <button
+            onClick={() => setNotification(null)}
+            className="text-emerald-200 hover:underline"
+          >
             Dismiss
           </button>
         </div>
@@ -199,7 +204,9 @@ export const InventoryPage: React.FC = () => {
                   <tr key={item.id} className="hover:bg-slate-800/40 transition">
                     <td className="py-3.5 px-4">
                       <div className="font-medium text-white text-xs">{item.warehouseName}</div>
-                      <div className="text-[11px] font-mono text-slate-400">{item.warehouseCode}</div>
+                      <div className="text-[11px] font-mono text-slate-400">
+                        {item.warehouseCode}
+                      </div>
                     </td>
                     <td className="py-3.5 px-4">
                       <div className="font-mono text-xs text-indigo-300">{item.sku}</div>

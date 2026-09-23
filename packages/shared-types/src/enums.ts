@@ -44,3 +44,5 @@ export enum OutboxEventStatus {
   PROCESSED = 'PROCESSED',
   FAILED = 'FAILED',
 }
+
+export { OutboxEventStatus as OutboxStatus };

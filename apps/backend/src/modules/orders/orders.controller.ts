@@ -10,8 +10,12 @@ import {
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto, UpdateOrderStatusDto } from './dto/orders.dto';
-import { CurrentUser, TenantId, AuthenticatedUser } from '../../common/decorators/current-user.decorator';
-import { OrderStatus } from '@prisma/client';
+import {
+  CurrentUser,
+  TenantId,
+  AuthenticatedUser,
+} from '../../common/decorators/current-user.decorator';
+import { OrderStatus } from '@pulsecommerce/shared-types';
 
 @Controller('orders')
 @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
@@ -19,18 +23,12 @@ export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   @Get()
-  async listOrders(
-    @TenantId() tenantId: string,
-    @Query('status') status?: OrderStatus,
-  ) {
+  async listOrders(@TenantId() tenantId: string, @Query('status') status?: OrderStatus) {
     return this.ordersService.listOrders(tenantId, status);
   }
 
   @Get(':id')
-  async getOrder(
-    @Param('id') id: string,
-    @TenantId() tenantId: string,
-  ) {
+  async getOrder(@Param('id') id: string, @TenantId() tenantId: string) {
     return this.ordersService.getOrderById(id, tenantId);
   }
 
@@ -53,9 +51,7 @@ export class OrdersController {
   }
 
   @Get(':id/invoice')
-  async getOrderInvoicePdf(
-    @Param('id') orderId: string,
-  ) {
+  async getOrderInvoicePdf(@Param('id') orderId: string) {
     return this.ordersService.generateInvoicePdf(orderId);
   }
 }

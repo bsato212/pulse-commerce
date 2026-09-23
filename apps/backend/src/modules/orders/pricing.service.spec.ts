@@ -30,9 +30,7 @@ describe('PricingService', () => {
   });
 
   it('should apply discount percentage to line items and order totals', () => {
-    const items = [
-      { productId: 'prod-1', unitPrice: 200, quantity: 1 },
-    ];
+    const items = [{ productId: 'prod-1', unitPrice: 200, quantity: 1 }];
 
     const result = service.calculateOrderTotals(items, 10); // 10% off
 

@@ -18,10 +18,7 @@ export class InventoryController {
   constructor(private readonly inventoryService: InventoryService) {}
 
   @Get('stocks')
-  async getStocks(
-    @TenantId() tenantId: string,
-    @Query('warehouseId') warehouseId?: string,
-  ) {
+  async getStocks(@TenantId() tenantId: string, @Query('warehouseId') warehouseId?: string) {
     return this.inventoryService.getStocks(tenantId, warehouseId);
   }
 

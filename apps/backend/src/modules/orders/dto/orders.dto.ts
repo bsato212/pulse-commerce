@@ -9,7 +9,7 @@ import {
   IsEnum,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus } from '@pulsecommerce/shared-types';
 
 export class OrderItemInputDto {
   @IsString()
@@ -53,6 +53,9 @@ export class CreateOrderDto {
   @IsOptional()
   @IsString()
   discountCode?: string;
+
+  @IsOptional()
+  billingAddress?: Record<string, any>;
 }
 
 export class UpdateOrderStatusDto {

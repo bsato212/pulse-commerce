@@ -19,10 +19,7 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Get()
-  async listProducts(
-    @TenantId() tenantId: string,
-    @Query() query: ProductQueryDto,
-  ) {
+  async listProducts(@TenantId() tenantId: string, @Query() query: ProductQueryDto) {
     return this.productsService.listProducts(tenantId, query);
   }
 
@@ -32,18 +29,12 @@ export class ProductsController {
   }
 
   @Post()
-  async createProduct(
-    @TenantId() tenantId: string,
-    @Body() dto: CreateProductDto,
-  ) {
+  async createProduct(@TenantId() tenantId: string, @Body() dto: CreateProductDto) {
     return this.productsService.createProduct(tenantId, dto);
   }
 
   @Put(':id/price')
-  async updatePrice(
-    @Param('id') id: string,
-    @Body() dto: UpdateProductPriceDto,
-  ) {
+  async updatePrice(@Param('id') id: string, @Body() dto: UpdateProductPriceDto) {
     return this.productsService.updateProductPrice(id, dto);
   }
 }

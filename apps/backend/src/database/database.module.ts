@@ -1,9 +1,64 @@
-import { Global, Module } from '@nestjs/common';
-import { PrismaService } from './prisma.service';
+import { Module, Global } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigService } from '@nestjs/config';
+import {
+  Tenant,
+  User,
+  Category,
+  Product,
+  Warehouse,
+  WarehouseStock,
+  StockReservation,
+  Order,
+  OrderItem,
+  Shipment,
+  OutboxEvent,
+  WebhookSubscription,
+} from './entities';
 
 @Global()
 @Module({
-  providers: [PrismaService],
-  exports: [PrismaService],
+  imports: [
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        type: 'postgres',
+        url:
+          config.get<string>('DATABASE_URL') ||
+          'postgresql://pulse_user:pulse_password@localhost:5432/pulse_commerce?schema=public',
+        entities: [
+          Tenant,
+          User,
+          Category,
+          Product,
+          Warehouse,
+          WarehouseStock,
+          StockReservation,
+          Order,
+          OrderItem,
+          Shipment,
+          OutboxEvent,
+          WebhookSubscription,
+        ],
+        synchronize: false,
+        logging: config.get<string>('NODE_ENV') !== 'production',
+      }),
+    }),
+    TypeOrmModule.forFeature([
+      Tenant,
+      User,
+      Category,
+      Product,
+      Warehouse,
+      WarehouseStock,
+      StockReservation,
+      Order,
+      OrderItem,
+      Shipment,
+      OutboxEvent,
+      WebhookSubscription,
+    ]),
+  ],
+  exports: [TypeOrmModule],
 })
 export class DatabaseModule {}

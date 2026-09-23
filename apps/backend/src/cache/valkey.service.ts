@@ -37,7 +37,9 @@ export class ValkeyService implements OnModuleInit, OnModuleDestroy {
       });
 
       this.client.connect().catch((err) => {
-        this.logger.warn(`Initial Valkey connection failed: ${err.message}. Operating with in-memory cache.`);
+        this.logger.warn(
+          `Initial Valkey connection failed: ${err.message}. Operating with in-memory cache.`,
+        );
       });
     } catch (err: any) {
       this.logger.warn(`Failed to initialize Valkey client: ${err.message}`);

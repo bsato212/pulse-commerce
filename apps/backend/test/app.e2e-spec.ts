@@ -1,17 +1,23 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
+import { getRepositoryToken, getConnectionToken, getDataSourceToken } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { PrismaService } from '../src/database/prisma.service';
+import { Product, Order } from '../src/database/entities';
 
 describe('PulseCommerce API (e2e)', () => {
   let app: INestApplication;
 
-  const mockPrisma = {
-    $connect: jest.fn(),
-    $disconnect: jest.fn(),
-    product: {
-      findMany: jest.fn().mockResolvedValue([
+  const mockProductQueryBuilder: any = {
+    leftJoinAndSelect: jest.fn().mockReturnThis(),
+    where: jest.fn().mockReturnThis(),
+    andWhere: jest.fn().mockReturnThis(),
+    orderBy: jest.fn().mockReturnThis(),
+    skip: jest.fn().mockReturnThis(),
+    take: jest.fn().mockReturnThis(),
+    getManyAndCount: jest.fn().mockResolvedValue([
+      [
         {
           id: 'prod-1',
           sku: 'AUDIO-ANC-PRO',
@@ -26,50 +32,97 @@ describe('PulseCommerce API (e2e)', () => {
           createdAt: new Date(),
           updatedAt: new Date(),
         },
-      ]),
-      count: jest.fn().mockResolvedValue(1),
-      findUnique: jest.fn().mockResolvedValue({
-        id: 'prod-1',
-        name: 'Pulse ANC Pro Wireless Headphones',
-        price: 299.99,
+      ],
+      1,
+    ]),
+  };
+
+  const mockProductRepo = {
+    metadata: { columns: [], relations: [] },
+    createQueryBuilder: jest.fn(() => mockProductQueryBuilder),
+    findOne: jest.fn(),
+    find: jest.fn().mockResolvedValue([]),
+    update: jest.fn(),
+  };
+
+  const mockOrderRepo = {
+    metadata: { columns: [], relations: [] },
+    createQueryBuilder: jest.fn(() => ({
+      leftJoinAndSelect: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
+      orderBy: jest.fn().mockReturnThis(),
+      getOne: jest.fn().mockResolvedValue(null),
+      getMany: jest.fn().mockResolvedValue([]),
+    })),
+    findOne: jest.fn().mockResolvedValue({
+      id: 'ord-101',
+      orderNumber: 'ORD-2026-1001',
+      customerEmail: 'jane.smith@example.com',
+      subtotal: 299.99,
+      discountTotal: 0,
+      taxTotal: 25.49,
+      shippingTotal: 15.0,
+      grandTotal: 340.48,
+      currency: 'USD',
+      createdAt: new Date(),
+      tenant: { name: 'Acme Retail Corp' },
+      customer: { name: 'Jane Smith', email: 'jane.smith@example.com' },
+      items: [],
+    }),
+    find: jest.fn().mockResolvedValue([]),
+    create: jest.fn((e) => e),
+    save: jest.fn((e) => Promise.resolve(e)),
+  };
+
+  const genericMockRepo = {
+    metadata: { columns: [], relations: [] },
+    find: jest.fn().mockResolvedValue([]),
+    findOne: jest.fn().mockResolvedValue(null),
+    findAndCount: jest.fn().mockResolvedValue([[], 0]),
+    createQueryBuilder: jest.fn(() => mockProductQueryBuilder),
+    create: jest.fn((e) => e),
+    save: jest.fn((e) => Promise.resolve(e)),
+    update: jest.fn().mockResolvedValue({ affected: 1 }),
+  };
+
+  const mockDataSource = {
+    isInitialized: true,
+    options: { type: 'postgres' },
+    entityMetadatas: [],
+    initialize: jest.fn().mockResolvedValue(true),
+    destroy: jest.fn().mockResolvedValue(true),
+    transaction: jest.fn((cb) =>
+      cb({
+        create: jest.fn((_, e) => e),
+        save: jest.fn((_, e) => Promise.resolve(e)),
       }),
-      update: jest.fn().mockResolvedValue({
-        id: 'prod-1',
-        price: 319.99,
-      }),
-    },
-    warehouseStock: {
-      findMany: jest.fn().mockResolvedValue([]),
-    },
-    warehouse: {
-      findMany: jest.fn().mockResolvedValue([]),
-    },
-    order: {
-      findMany: jest.fn().mockResolvedValue([]),
-      findUnique: jest.fn().mockResolvedValue({
-        id: 'ord-101',
-        orderNumber: 'ORD-2026-1001',
-        customerEmail: 'jane.smith@example.com',
-        subtotal: 299.99,
-        discountTotal: 0,
-        taxTotal: 25.49,
-        shippingTotal: 15.0,
-        grandTotal: 340.48,
-        currency: 'USD',
-        createdAt: new Date(),
-        tenant: { name: 'Acme Retail Corp' },
-        customer: { name: 'Jane Smith', email: 'jane.smith@example.com' },
-        items: [],
-      }),
-    },
+    ),
+    getRepository: jest.fn((entity: any) => {
+      if (entity === Product || entity?.name === 'Product') {
+        return mockProductRepo;
+      }
+      if (entity === Order || entity?.name === 'Order') {
+        return mockOrderRepo;
+      }
+      return genericMockRepo;
+    }),
   };
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     })
-      .overrideProvider(PrismaService)
-      .useValue(mockPrisma)
+      .overrideProvider(DataSource)
+      .useValue(mockDataSource)
+      .overrideProvider(getDataSourceToken())
+      .useValue(mockDataSource)
+      .overrideProvider(getConnectionToken())
+      .useValue(mockDataSource)
+      .overrideProvider(getRepositoryToken(Product))
+      .useValue(mockProductRepo)
+      .overrideProvider(getRepositoryToken(Order))
+      .useValue(mockOrderRepo)
       .compile();
 
     app = moduleFixture.createNestApplication();
@@ -78,7 +131,9 @@ describe('PulseCommerce API (e2e)', () => {
   });
 
   afterAll(async () => {
-    await app.close();
+    if (app) {
+      await app.close();
+    }
   });
 
   it('/api/v1/products (GET)', () => {

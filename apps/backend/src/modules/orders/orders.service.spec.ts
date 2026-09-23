@@ -1,40 +1,65 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 import { OrdersService } from './orders.service';
-import { PrismaService } from '../../database/prisma.service';
 import { PricingService } from './pricing.service';
+import { Order, OrderItem, Product, OutboxEvent } from '../../database/entities';
 import { BadRequestException } from '@nestjs/common';
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus } from '@pulsecommerce/shared-types';
 
 describe('OrdersService', () => {
   let service: OrdersService;
 
-  const mockPrisma = {
-    order: {
-      findMany: jest.fn(),
-      findFirst: jest.fn(),
-      findUnique: jest.fn(),
-      create: jest.fn(),
-      update: jest.fn(),
-    },
-    product: {
-      findMany: jest.fn(),
-    },
-    outboxEvent: {
-      create: jest.fn(),
-    },
-    $transaction: jest.fn(),
+  const mockOrderQueryBuilder: any = {
+    leftJoinAndSelect: jest.fn().mockReturnThis(),
+    where: jest.fn().mockReturnThis(),
+    andWhere: jest.fn().mockReturnThis(),
+    orderBy: jest.fn().mockReturnThis(),
+    getOne: jest.fn(),
+    getMany: jest.fn(),
+  };
+
+  const mockOrderRepo = {
+    createQueryBuilder: jest.fn(() => mockOrderQueryBuilder),
+    findOne: jest.fn(),
+    find: jest.fn(),
+    create: jest.fn(),
+    save: jest.fn(),
+  };
+
+  const mockOrderItemRepo = {
+    create: jest.fn(),
+    save: jest.fn(),
+  };
+
+  const mockProductRepo = {
+    find: jest.fn(),
+    findOne: jest.fn(),
+  };
+
+  const mockOutboxRepo = {
+    create: jest.fn(),
+    save: jest.fn(),
   };
 
   const mockPricing = {
     calculateOrderTotals: jest.fn(),
   };
 
+  const mockDataSource = {
+    transaction: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         OrdersService,
-        { provide: PrismaService, useValue: mockPrisma },
+        { provide: getRepositoryToken(Order), useValue: mockOrderRepo },
+        { provide: getRepositoryToken(OrderItem), useValue: mockOrderItemRepo },
+        { provide: getRepositoryToken(Product), useValue: mockProductRepo },
+        { provide: getRepositoryToken(OutboxEvent), useValue: mockOutboxRepo },
         { provide: PricingService, useValue: mockPricing },
+        { provide: DataSource, useValue: mockDataSource },
       ],
     }).compile();
 
@@ -48,7 +73,7 @@ describe('OrdersService', () => {
 
   describe('transitionStatus', () => {
     it('should disallow invalid order state transition', async () => {
-      mockPrisma.order.findFirst.mockResolvedValue({
+      mockOrderQueryBuilder.getOne.mockResolvedValue({
         id: 'ord-1',
         orderNumber: 'ORD-101',
         status: OrderStatus.DELIVERED,
@@ -62,26 +87,21 @@ describe('OrdersService', () => {
     });
 
     it('should allow valid transition from CONFIRMED to ALLOCATING', async () => {
-      mockPrisma.order.findFirst.mockResolvedValue({
+      mockOrderQueryBuilder.getOne.mockResolvedValue({
         id: 'ord-1',
         orderNumber: 'ORD-101',
         status: OrderStatus.CONFIRMED,
         fulfillmentStatus: 'UNFULFILLED',
       });
 
-      mockPrisma.order.update.mockResolvedValue({
-        id: 'ord-1',
-        orderNumber: 'ORD-101',
-        status: OrderStatus.ALLOCATING,
-        fulfillmentStatus: 'UNFULFILLED',
-      });
+      mockOrderRepo.save.mockImplementation((entity) => Promise.resolve(entity));
 
       const updated = await service.transitionStatus('ord-1', 'tenant-1', {
         status: OrderStatus.ALLOCATING,
       });
 
       expect(updated.status).toBe(OrderStatus.ALLOCATING);
-      expect(mockPrisma.order.update).toHaveBeenCalled();
+      expect(mockOrderRepo.save).toHaveBeenCalled();
     });
   });
 });

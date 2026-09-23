@@ -1,13 +1,10 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-  Logger,
-} from '@nestjs/common';
-import { PrismaService } from '../../database/prisma.service';
+import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, DataSource, In } from 'typeorm';
+import { Order, OrderItem, Product, OutboxEvent } from '../../database/entities';
 import { PricingService } from './pricing.service';
 import { CreateOrderDto, UpdateOrderStatusDto } from './dto/orders.dto';
-import { OrderStatus, PaymentStatus, FulfillmentStatus } from '@prisma/client';
+import { OrderStatus, PaymentStatus, FulfillmentStatus } from '@pulsecommerce/shared-types';
 
 const ALLOWED_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   [OrderStatus.DRAFT]: [OrderStatus.PENDING, OrderStatus.CANCELLED],
@@ -26,42 +23,46 @@ export class OrdersService {
   private readonly logger = new Logger(OrdersService.name);
 
   constructor(
-    private readonly prisma: PrismaService,
+    @InjectRepository(Order)
+    private readonly orderRepo: Repository<Order>,
+    @InjectRepository(OrderItem)
+    private readonly orderItemRepo: Repository<OrderItem>,
+    @InjectRepository(Product)
+    private readonly productRepo: Repository<Product>,
+    @InjectRepository(OutboxEvent)
+    private readonly outboxRepo: Repository<OutboxEvent>,
     private readonly pricingService: PricingService,
+    private readonly dataSource: DataSource,
   ) {}
 
   async listOrders(tenantId: string, status?: OrderStatus) {
-    const where: any = { tenantId };
+    const qb = this.orderRepo
+      .createQueryBuilder('order')
+      .leftJoinAndSelect('order.items', 'items')
+      .leftJoinAndSelect('order.shipments', 'shipments')
+      .where('order.tenantId = :tenantId', { tenantId });
+
     if (status) {
-      where.status = status;
+      qb.andWhere('order.status = :status', { status });
     }
 
-    return this.prisma.order.findMany({
-      where,
-      include: {
-        items: true,
-        shipments: true,
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+    qb.orderBy('order.createdAt', 'DESC');
+    return qb.getMany();
   }
 
   async getOrderById(id: string, tenantId?: string) {
-    const where: any = { id };
+    const qb = this.orderRepo
+      .createQueryBuilder('order')
+      .leftJoinAndSelect('order.items', 'items')
+      .leftJoinAndSelect('order.shipments', 'shipments')
+      .leftJoinAndSelect('order.customer', 'customer')
+      .where('order.id = :id', { id });
+
     if (tenantId) {
-      where.tenantId = tenantId;
+      qb.andWhere('order.tenantId = :tenantId', { tenantId });
     }
 
-    const order = await this.prisma.order.findFirst({
-      where,
-      include: {
-        items: true,
-        shipments: true,
-        customer: {
-          select: { id: true, name: true, email: true },
-        },
-      },
-    });
+    const order = await qb.getOne();
 
     if (!order) {
       throw new NotFoundException(`Order with ID ${id} was not found`);
@@ -71,12 +72,10 @@ export class OrdersService {
   }
 
   async createOrder(tenantId: string, customerId: string, dto: CreateOrderDto) {
-    // 1. Fetch products
     const productIds = dto.items.map((i) => i.productId);
-    const products = await this.prisma.product.findMany({
+    const products = await this.productRepo.find({
       where: {
-        id: { in: productIds },
-        tenantId,
+        id: In(productIds),
         active: true,
       },
     });
@@ -87,77 +86,72 @@ export class OrdersService {
 
     const productMap = new Map(products.map((p) => [p.id, p]));
 
-    // 2. Prepare calculation input
     const calculationItems = dto.items.map((item) => {
       const prod = productMap.get(item.productId)!;
       return {
         productId: prod.id,
-        unitPrice: prod.price,
+        unitPrice: Number(prod.price),
         quantity: item.quantity,
       };
     });
 
-    // 3. Calculate totals (using pricing service)
     const discountPercent = dto.discountCode === 'PULSE10' ? 10 : 0;
     const pricing = this.pricingService.calculateOrderTotals(calculationItems, discountPercent);
 
-    // 4. Generate order number
     const datePrefix = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const randomSuffix = Math.floor(1000 + Math.random() * 9000);
     const orderNumber = `ORD-${datePrefix}-${randomSuffix}`;
 
-    // 5. Persist order with line items in transaction
-    const order = await this.prisma.$transaction(async (tx) => {
-      const newOrder = await tx.order.create({
-        data: {
-          tenantId,
-          orderNumber,
-          customerId,
-          customerEmail: dto.customerEmail,
-          status: OrderStatus.CONFIRMED,
-          paymentStatus: PaymentStatus.AUTHORIZED,
-          fulfillmentStatus: FulfillmentStatus.UNFULFILLED,
-          shippingAddress: dto.shippingAddress as any,
-          subtotal: pricing.subtotal,
-          discountTotal: pricing.discountTotal,
-          taxTotal: pricing.taxTotal,
-          shippingTotal: pricing.shippingTotal,
-          grandTotal: pricing.grandTotal,
-          currency: 'USD',
-          items: {
-            create: pricing.items.map((line) => {
-              const p = productMap.get(line.productId)!;
-              return {
-                productId: line.productId,
-                sku: p.sku,
-                productName: p.name,
-                unitPrice: line.unitPrice,
-                quantity: line.quantity,
-                discountAmount: line.discountAmount,
-                taxAmount: line.taxAmount,
-                subtotal: line.subtotal,
-              };
-            }),
-          },
-        },
-        include: { items: true },
+    const order = await this.dataSource.transaction(async (manager) => {
+      const newOrder = manager.create(Order, {
+        tenantId,
+        orderNumber,
+        customerId,
+        customerEmail: dto.customerEmail,
+        status: OrderStatus.CONFIRMED,
+        paymentStatus: PaymentStatus.AUTHORIZED,
+        fulfillmentStatus: FulfillmentStatus.UNFULFILLED,
+        shippingAddress: dto.shippingAddress,
+        billingAddress: dto.billingAddress || null,
+        subtotal: pricing.subtotal,
+        discountTotal: pricing.discountTotal,
+        taxTotal: pricing.taxTotal,
+        shippingTotal: pricing.shippingTotal,
+        grandTotal: pricing.grandTotal,
+        currency: 'USD',
       });
 
-      // Write outbox event for fulfillment notification
-      await tx.outboxEvent.create({
-        data: {
-          eventType: 'order.created',
-          aggregateId: newOrder.id,
-          payload: {
-            orderId: newOrder.id,
-            orderNumber: newOrder.orderNumber,
-            grandTotal: newOrder.grandTotal,
-            items: newOrder.items.map((i) => ({ sku: i.sku, quantity: i.quantity })),
-          },
+      const savedOrder = await manager.save(Order, newOrder);
+
+      const items = pricing.items.map((line) => {
+        const p = productMap.get(line.productId)!;
+        return manager.create(OrderItem, {
+          orderId: savedOrder.id,
+          productId: line.productId,
+          sku: p.sku,
+          productName: p.name,
+          unitPrice: line.unitPrice,
+          quantity: line.quantity,
+          discount: line.discountAmount,
+          subtotal: line.subtotal,
+        });
+      });
+
+      savedOrder.items = await manager.save(OrderItem, items);
+
+      const event = manager.create(OutboxEvent, {
+        eventType: 'order.created',
+        aggregateId: savedOrder.id,
+        payload: {
+          orderId: savedOrder.id,
+          orderNumber: savedOrder.orderNumber,
+          grandTotal: savedOrder.grandTotal,
+          items: savedOrder.items.map((i) => ({ sku: i.sku, quantity: i.quantity })),
         },
       });
 
-      return newOrder;
+      await manager.save(OutboxEvent, event);
+      return savedOrder;
     });
 
     this.logger.log(`Created order ${order.orderNumber} ($${order.grandTotal})`);
@@ -174,38 +168,28 @@ export class OrdersService {
       );
     }
 
-    const updated = await this.prisma.order.update({
-      where: { id: orderId },
-      data: {
-        status: dto.status,
-        fulfillmentStatus:
-          dto.status === OrderStatus.SHIPPED
-            ? FulfillmentStatus.FULFILLED
-            : order.fulfillmentStatus,
-      },
-      include: { items: true },
-    });
+    order.status = dto.status;
+    if (dto.status === OrderStatus.SHIPPED) {
+      order.fulfillmentStatus = FulfillmentStatus.FULFILLED;
+    }
 
-    this.logger.log(`Order ${order.orderNumber} transitioned from ${order.status} to ${dto.status}`);
+    const updated = await this.orderRepo.save(order);
+    this.logger.log(
+      `Order ${order.orderNumber} transitioned from ${order.status} to ${dto.status}`,
+    );
     return updated;
   }
 
-  // Invoice generator for customer and accountant downloads
   async generateInvoicePdf(orderId: string) {
-    const order = await this.prisma.order.findUnique({
+    const order = await this.orderRepo.findOne({
       where: { id: orderId },
-      include: {
-        items: true,
-        tenant: true,
-        customer: true,
-      },
+      relations: ['items', 'tenant', 'customer'],
     });
 
     if (!order) {
       throw new NotFoundException(`Order ${orderId} not found`);
     }
 
-    // Generates JSON structure formatted for PDF printing/streaming
     return {
       invoiceNumber: `INV-${order.orderNumber}`,
       date: order.createdAt.toISOString(),
@@ -219,16 +203,16 @@ export class OrdersService {
       lineItems: order.items.map((i) => ({
         sku: i.sku,
         name: i.productName,
-        price: i.unitPrice,
+        price: Number(i.unitPrice),
         quantity: i.quantity,
-        total: i.subtotal,
+        total: Number(i.subtotal),
       })),
       pricing: {
-        subtotal: order.subtotal,
-        discount: order.discountTotal,
-        tax: order.taxTotal,
-        shipping: order.shippingTotal,
-        grandTotal: order.grandTotal,
+        subtotal: Number(order.subtotal),
+        discount: Number(order.discountTotal),
+        tax: Number(order.taxTotal),
+        shipping: Number(order.shippingTotal),
+        grandTotal: Number(order.grandTotal),
         currency: order.currency,
       },
     };

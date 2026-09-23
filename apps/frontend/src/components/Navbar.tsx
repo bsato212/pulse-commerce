@@ -31,7 +31,9 @@ export const Navbar: React.FC = () => {
 
         <div className="flex items-center space-x-2 text-xs px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700/60 text-slate-300">
           <Activity className="w-3.5 h-3.5 text-emerald-400" />
-          <span>Tenant: <strong className="text-white">Acme Retail Corp</strong></span>
+          <span>
+            Tenant: <strong className="text-white">Acme Retail Corp</strong>
+          </span>
         </div>
 
         <button className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition">

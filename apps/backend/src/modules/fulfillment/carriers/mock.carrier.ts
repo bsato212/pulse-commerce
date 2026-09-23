@@ -25,7 +25,9 @@ export class MockInternalCarrier implements CarrierAdapter {
     const randomSuffix = Math.floor(1000000 + Math.random() * 9000000);
     const trackingNumber = `PLS-INT-${randomSuffix}`;
 
-    this.logger.log(`Generated manifest for order ${request.orderId} via ${this.carrierCode}: ${trackingNumber}`);
+    this.logger.log(
+      `Generated manifest for order ${request.orderId} via ${this.carrierCode}: ${trackingNumber}`,
+    );
 
     return {
       trackingNumber,

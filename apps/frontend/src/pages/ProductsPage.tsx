@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { fetchApi } from '../api/client';
-import { Package, Search, DollarSign, Tag, Server } from 'lucide-react';
+import { Search, Server } from 'lucide-react';
 
 interface Product {
   id: string;
@@ -16,16 +16,16 @@ interface Product {
 
 export const ProductsPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
   const [search, setSearch] = useState<string>('');
   const [priceModal, setPriceModal] = useState<Product | null>(null);
   const [newPrice, setNewPrice] = useState<number>(0);
   const [feedback, setFeedback] = useState<string | null>(null);
 
   const loadProducts = async () => {
-    setLoading(true);
     try {
-      const res = await fetchApi<{ data: Product[] }>(`/products?search=${encodeURIComponent(search)}`);
+      const res = await fetchApi<{ data: Product[] }>(
+        `/products?search=${encodeURIComponent(search)}`,
+      );
       setProducts(res.data);
     } catch {
       // Fallback seed catalog
@@ -64,8 +64,6 @@ export const ProductsPage: React.FC = () => {
           totalAvailableStock: 66,
         },
       ]);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -144,16 +142,16 @@ export const ProductsPage: React.FC = () => {
                 </span>
               </div>
               <h3 className="font-bold text-base text-white mt-1">{product.name}</h3>
-              <p className="text-xs text-slate-400 mt-2 leading-relaxed">
-                {product.description}
-              </p>
+              <p className="text-xs text-slate-400 mt-2 leading-relaxed">{product.description}</p>
             </div>
 
             <div className="mt-6 pt-4 border-t border-slate-700/60 flex items-center justify-between">
               <div>
                 <span className="text-xs text-slate-400 block">Unit Price</span>
                 <span className="text-xl font-bold text-white">${product.price.toFixed(2)}</span>
-                <span className="text-[10px] text-slate-500 block">Cost: ${product.costPrice.toFixed(2)}</span>
+                <span className="text-[10px] text-slate-500 block">
+                  Cost: ${product.costPrice.toFixed(2)}
+                </span>
               </div>
 
               <div className="flex flex-col items-end gap-2">

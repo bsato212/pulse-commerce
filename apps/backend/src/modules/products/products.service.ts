@@ -1,5 +1,7 @@
 import { Injectable, NotFoundException, Logger } from '@nestjs/common';
-import { PrismaService } from '../../database/prisma.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Product, Category } from '../../database/entities';
 import { ValkeyService } from '../../cache/valkey.service';
 import { CreateProductDto, ProductQueryDto, UpdateProductPriceDto } from './dto/products.dto';
 
@@ -9,7 +11,10 @@ export class ProductsService {
   private readonly CATALOG_CACHE_TTL = 600; // 10 minutes
 
   constructor(
-    private readonly prisma: PrismaService,
+    @InjectRepository(Product)
+    private readonly productRepo: Repository<Product>,
+    @InjectRepository(Category)
+    private readonly categoryRepo: Repository<Category>,
     private readonly valkeyService: ValkeyService,
   ) {}
 
@@ -19,50 +24,46 @@ export class ProductsService {
     const skip = (page - 1) * limit;
 
     const cacheKey = `catalog:products:tenant:${tenantId}:page:${page}:limit:${limit}:search:${query.search || ''}:cat:${query.categoryId || ''}`;
-    
+
     return this.valkeyService.remember(cacheKey, this.CATALOG_CACHE_TTL, async () => {
       this.logger.debug(`Fetching products from database for tenant: ${tenantId}, page: ${page}`);
-      
-      const where: any = {
-        tenantId,
-        active: true,
-      };
+
+      const qb = this.productRepo
+        .createQueryBuilder('product')
+        .leftJoinAndSelect('product.category', 'category')
+        .leftJoinAndSelect('product.warehouseStock', 'warehouseStock')
+        .where('product.active = :active', { active: true });
 
       if (query.search) {
-        where.OR = [
-          { name: { contains: query.search, mode: 'insensitive' } },
-          { sku: { contains: query.search, mode: 'insensitive' } },
-        ];
+        qb.andWhere('(product.name ILIKE :search OR product.sku ILIKE :search)', {
+          search: `%${query.search}%`,
+        });
       }
 
       if (query.categoryId) {
-        where.categoryId = query.categoryId;
+        qb.andWhere('product.categoryId = :categoryId', { categoryId: query.categoryId });
       }
 
-      const [items, total] = await Promise.all([
-        this.prisma.product.findMany({
-          where,
-          skip,
-          take: limit,
-          include: {
-            category: true,
-            warehouseStock: true,
-          },
-          orderBy: { createdAt: 'desc' },
-        }),
-        this.prisma.product.count({ where }),
-      ]);
+      qb.orderBy('product.createdAt', 'DESC').skip(skip).take(limit);
+
+      const [items, total] = await qb.getManyAndCount();
 
       const itemsWithStock = items.map((product) => {
-        const totalStock = product.warehouseStock.reduce((acc, s) => acc + s.quantity, 0);
-        const totalReserved = product.warehouseStock.reduce((acc, s) => acc + s.reservedQuantity, 0);
+        const totalStock = (product.warehouseStock || []).reduce(
+          (acc, s) => acc + Number(s.quantity),
+          0,
+        );
+        const totalReserved = (product.warehouseStock || []).reduce(
+          (acc, s) => acc + Number(s.reservedQuantity),
+          0,
+        );
         return {
           id: product.id,
           sku: product.sku,
           name: product.name,
           description: product.description,
-          price: product.price,
-          costPrice: product.costPrice,
+          price: Number(product.price),
+          costPrice: Number(product.costPrice),
           categoryId: product.categoryId,
           categoryName: product.category?.name,
           active: product.active,
@@ -86,16 +87,11 @@ export class ProductsService {
 
   async getProductById(id: string) {
     const cacheKey = `catalog:product:${id}`;
-    
+
     return this.valkeyService.remember(cacheKey, this.CATALOG_CACHE_TTL, async () => {
-      const product = await this.prisma.product.findUnique({
+      const product = await this.productRepo.findOne({
         where: { id },
-        include: {
-          category: true,
-          warehouseStock: {
-            include: { warehouse: true },
-          },
-        },
+        relations: ['category', 'warehouseStock', 'warehouseStock.warehouse'],
       });
 
       if (!product) {
@@ -106,38 +102,34 @@ export class ProductsService {
     });
   }
 
-  async createProduct(tenantId: string, dto: CreateProductDto) {
-    const product = await this.prisma.product.create({
-      data: {
-        tenantId,
-        sku: dto.sku,
-        name: dto.name,
-        description: dto.description,
-        price: dto.price,
-        costPrice: dto.costPrice,
-        categoryId: dto.categoryId,
-      },
+  async createProduct(_tenantId: string, dto: CreateProductDto) {
+    const product = this.productRepo.create({
+      sku: dto.sku,
+      name: dto.name,
+      description: dto.description,
+      price: dto.price,
+      costPrice: dto.costPrice,
+      categoryId: dto.categoryId,
     });
 
-    this.logger.log(`Created new catalog product ${product.sku} for tenant ${tenantId}`);
-    return product;
+    const saved = await this.productRepo.save(product);
+    this.logger.log(`Created new catalog product ${saved.sku}`);
+    return saved;
   }
 
   async updateProductPrice(id: string, dto: UpdateProductPriceDto) {
-    const existing = await this.prisma.product.findUnique({ where: { id } });
+    const existing = await this.productRepo.findOne({ where: { id } });
     if (!existing) {
       throw new NotFoundException(`Product with ID ${id} was not found`);
     }
 
-    const updated = await this.prisma.product.update({
-      where: { id },
-      data: { price: dto.price },
-    });
+    await this.productRepo.update(id, { price: dto.price });
+    const updated = await this.productRepo.findOne({ where: { id } });
 
     // Invalidate product cache
     await this.valkeyService.del(`product:${id}`);
 
-    this.logger.log(`Updated price for product ${id} from ${existing.price} to ${updated.price}`);
+    this.logger.log(`Updated price for product ${id} from ${existing.price} to ${updated!.price}`);
     return updated;
   }
 }

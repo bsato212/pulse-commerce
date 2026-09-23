@@ -1,14 +1,6 @@
 import React, { useState } from 'react';
 import { fetchApi } from '../api/client';
-import {
-  Sparkles,
-  GitPullRequest,
-  CheckCircle,
-  Code2,
-  Terminal,
-  Send,
-  Layers,
-} from 'lucide-react';
+import { Sparkles, GitPullRequest, Send } from 'lucide-react';
 
 export const ExtensionHooksPage: React.FC = () => {
   const [outboxResult, setOutboxResult] = useState<any | null>(null);
@@ -37,7 +29,8 @@ export const ExtensionHooksPage: React.FC = () => {
           <h1 className="text-2xl font-bold text-white tracking-tight">AI Evaluation Playground</h1>
         </div>
         <p className="text-sm text-slate-300 max-w-3xl leading-relaxed">
-          This fullstack repository is pre-configured with standardized architectural hooks for evaluating
+          This fullstack repository is pre-configured with standardized architectural hooks for
+          evaluating
           <strong> AI Draft PR generation</strong> and <strong>AI Code Review (CR)</strong> agents.
         </p>
       </div>
@@ -60,14 +53,16 @@ export const ExtensionHooksPage: React.FC = () => {
               </div>
               <h3 className="font-bold text-white text-base">ShipBob 3PL Carrier Adapter</h3>
               <p className="text-xs text-slate-400 mt-2 leading-relaxed">
-                Connect external 3PL logistics provider to replace mock fleet. Implements rates, labels, and tracking webhooks.
+                Connect external 3PL logistics provider to replace mock fleet. Implements rates,
+                labels, and tracking webhooks.
               </p>
               <div className="mt-3 p-2.5 bg-slate-900/80 rounded-lg border border-slate-800 text-[11px] font-mono text-slate-400">
                 apps/backend/src/modules/fulfillment/carriers/shipbob.carrier.ts
               </div>
             </div>
             <div className="mt-4 pt-3 border-t border-slate-800 text-[11px] text-slate-400">
-              <strong>Evaluation Goal:</strong> Agent should implement `CarrierAdapter` interface, mock HTTP API calls, and add unit tests.
+              <strong>Evaluation Goal:</strong> Agent should implement `CarrierAdapter` interface,
+              mock HTTP API calls, and add unit tests.
             </div>
           </div>
 
@@ -82,14 +77,16 @@ export const ExtensionHooksPage: React.FC = () => {
               </div>
               <h3 className="font-bold text-white text-base">Tiered Promotions Engine</h3>
               <p className="text-xs text-slate-400 mt-2 leading-relaxed">
-                Expand checkout pricing with strategy-pattern discount rules: BOGO, volume tiers, and category exclusives.
+                Expand checkout pricing with strategy-pattern discount rules: BOGO, volume tiers,
+                and category exclusives.
               </p>
               <div className="mt-3 p-2.5 bg-slate-900/80 rounded-lg border border-slate-800 text-[11px] font-mono text-slate-400">
                 apps/backend/src/modules/orders/promotions/promotion-engine.service.ts
               </div>
             </div>
             <div className="mt-4 pt-3 border-t border-slate-800 text-[11px] text-slate-400">
-              <strong>Evaluation Goal:</strong> Agent should implement `PromotionRuleStrategy` classes and wire them into order calculation.
+              <strong>Evaluation Goal:</strong> Agent should implement `PromotionRuleStrategy`
+              classes and wire them into order calculation.
             </div>
           </div>
 
@@ -104,14 +101,16 @@ export const ExtensionHooksPage: React.FC = () => {
               </div>
               <h3 className="font-bold text-white text-base">Tenant Webhook Worker</h3>
               <p className="text-xs text-slate-400 mt-2 leading-relaxed">
-                Outbound event broadcaster signing payloads with HMAC-SHA256 and retrying on network drops.
+                Outbound event broadcaster signing payloads with HMAC-SHA256 and retrying on network
+                drops.
               </p>
               <div className="mt-3 p-2.5 bg-slate-900/80 rounded-lg border border-slate-800 text-[11px] font-mono text-slate-400">
                 apps/backend/src/modules/hooks-pending/webhooks/
               </div>
             </div>
             <div className="mt-4 pt-3 border-t border-slate-800 text-[11px] text-slate-400">
-              <strong>Evaluation Goal:</strong> Agent should implement an exponential backoff loop and delivery event status updates.
+              <strong>Evaluation Goal:</strong> Agent should implement an exponential backoff loop
+              and delivery event status updates.
             </div>
           </div>
         </div>

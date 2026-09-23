@@ -24,13 +24,7 @@ export const CurrentUser = createParamDecorator(
   },
 );
 
-export const TenantId = createParamDecorator(
-  (_data: unknown, ctx: ExecutionContext): string => {
-    const request = ctx.switchToHttp().getRequest();
-    return (
-      (request.headers['x-tenant-id'] as string) ||
-      request.user?.tenantId ||
-      'acme-corp'
-    );
-  },
-);
+export const TenantId = createParamDecorator((_data: unknown, ctx: ExecutionContext): string => {
+  const request = ctx.switchToHttp().getRequest();
+  return (request.headers['x-tenant-id'] as string) || request.user?.tenantId || 'acme-corp';
+});

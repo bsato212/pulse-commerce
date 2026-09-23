@@ -35,8 +35,9 @@ export class PricingService {
     discountPercent: number = 0,
     customShippingRate?: number,
   ): OrderPricingResult {
-    const shippingTotal = customShippingRate !== undefined ? customShippingRate : this.DEFAULT_SHIPPING_FLAT_RATE;
-    
+    const shippingTotal =
+      customShippingRate !== undefined ? customShippingRate : this.DEFAULT_SHIPPING_FLAT_RATE;
+
     let subtotal = 0;
     let totalDiscount = 0;
     let totalTax = 0;

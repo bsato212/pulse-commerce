@@ -1,18 +1,23 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from '../../../database/prisma.service';
-import { OutboxStatus } from '@prisma/client';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { OutboxEvent } from '../../../database/entities';
+import { OutboxStatus } from '@pulsecommerce/shared-types';
 
 @Injectable()
 export class OutboxService {
   private readonly logger = new Logger(OutboxService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    @InjectRepository(OutboxEvent)
+    private readonly outboxRepo: Repository<OutboxEvent>,
+  ) {}
 
   async publishPendingEvents(): Promise<number> {
-    const pendingEvents = await this.prisma.outboxEvent.findMany({
+    const pendingEvents = await this.outboxRepo.find({
       where: { status: OutboxStatus.PENDING },
       take: 50,
-      orderBy: { createdAt: 'asc' },
+      order: { createdAt: 'ASC' },
     });
 
     if (pendingEvents.length === 0) {
@@ -25,12 +30,9 @@ export class OutboxService {
     await Promise.all(
       pendingEvents.map(async (event) => {
         await this.dispatchSingleEvent(event);
-        await this.prisma.outboxEvent.update({
-          where: { id: event.id },
-          data: {
-            status: OutboxStatus.PROCESSED,
-            processedAt: new Date(),
-          },
+        await this.outboxRepo.update(event.id, {
+          status: OutboxStatus.PROCESSED,
+          processedAt: new Date(),
         });
       }),
     );

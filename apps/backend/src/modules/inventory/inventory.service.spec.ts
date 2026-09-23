@@ -1,39 +1,48 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 import { InventoryService } from './inventory.service';
-import { PrismaService } from '../../database/prisma.service';
+import { WarehouseStock, Warehouse, StockReservation } from '../../database/entities';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 describe('InventoryService', () => {
   let service: InventoryService;
-  let prisma: PrismaService;
 
-  const mockPrisma = {
-    warehouseStock: {
-      findUnique: jest.fn(),
-      findMany: jest.fn(),
-      update: jest.fn(),
-    },
-    warehouse: {
-      findMany: jest.fn(),
-    },
-    stockReservation: {
-      create: jest.fn(),
-      findUnique: jest.fn(),
-      update: jest.fn(),
-    },
-    $transaction: jest.fn(),
+  const mockStockRepo = {
+    findOne: jest.fn(),
+    find: jest.fn(),
+    save: jest.fn(),
+    createQueryBuilder: jest.fn(),
+  };
+
+  const mockWarehouseRepo = {
+    find: jest.fn(),
+    findOne: jest.fn(),
+    createQueryBuilder: jest.fn(),
+  };
+
+  const mockReservationRepo = {
+    create: jest.fn(),
+    save: jest.fn(),
+    findOne: jest.fn(),
+  };
+
+  const mockDataSource = {
+    transaction: jest.fn(),
   };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         InventoryService,
-        { provide: PrismaService, useValue: mockPrisma },
+        { provide: getRepositoryToken(WarehouseStock), useValue: mockStockRepo },
+        { provide: getRepositoryToken(Warehouse), useValue: mockWarehouseRepo },
+        { provide: getRepositoryToken(StockReservation), useValue: mockReservationRepo },
+        { provide: DataSource, useValue: mockDataSource },
       ],
     }).compile();
 
     service = module.get<InventoryService>(InventoryService);
-    prisma = module.get<PrismaService>(PrismaService);
     jest.clearAllMocks();
   });
 
@@ -43,7 +52,7 @@ describe('InventoryService', () => {
 
   describe('reserveStock', () => {
     it('should throw NotFoundException if stock record is missing', async () => {
-      mockPrisma.warehouseStock.findUnique.mockResolvedValue(null);
+      mockStockRepo.findOne.mockResolvedValue(null);
 
       await expect(
         service.reserveStock({
@@ -55,7 +64,7 @@ describe('InventoryService', () => {
     });
 
     it('should throw BadRequestException if available stock is insufficient', async () => {
-      mockPrisma.warehouseStock.findUnique.mockResolvedValue({
+      mockStockRepo.findOne.mockResolvedValue({
         id: 'ws-1',
         productId: 'prod-1',
         warehouseId: 'wh-1',
@@ -73,7 +82,7 @@ describe('InventoryService', () => {
     });
 
     it('should successfully reserve stock and return reservation ID', async () => {
-      mockPrisma.warehouseStock.findUnique.mockResolvedValue({
+      mockStockRepo.findOne.mockResolvedValue({
         id: 'ws-1',
         productId: 'prod-1',
         warehouseId: 'wh-1',
@@ -81,16 +90,19 @@ describe('InventoryService', () => {
         reservedQuantity: 5,
       });
 
-      mockPrisma.warehouseStock.update.mockResolvedValue({
-        id: 'ws-1',
-        quantity: 50,
-        reservedQuantity: 15,
+      mockStockRepo.save.mockImplementation((entity) => Promise.resolve(entity));
+
+      mockReservationRepo.create.mockReturnValue({
+        id: 'res-999',
+        warehouseStockId: 'ws-1',
+        quantity: 10,
+        status: 'RESERVED',
+        expiresAt: new Date(),
       });
 
-      mockPrisma.stockReservation.create.mockResolvedValue({
+      mockReservationRepo.save.mockResolvedValue({
         id: 'res-999',
-        productId: 'prod-1',
-        warehouseId: 'wh-1',
+        warehouseStockId: 'ws-1',
         quantity: 10,
         status: 'RESERVED',
         expiresAt: new Date(),
@@ -104,8 +116,8 @@ describe('InventoryService', () => {
 
       expect(result.reservationId).toBe('res-999');
       expect(result.quantity).toBe(10);
-      expect(mockPrisma.warehouseStock.update).toHaveBeenCalled();
-      expect(mockPrisma.stockReservation.create).toHaveBeenCalled();
+      expect(mockStockRepo.save).toHaveBeenCalled();
+      expect(mockReservationRepo.save).toHaveBeenCalled();
     });
   });
 });

@@ -12,7 +12,9 @@ export class ShipBobCarrier implements CarrierAdapter {
   readonly carrierCode = 'SHIPBOB';
 
   async quoteRate(_request: RateQuoteRequest): Promise<RateQuoteResponse> {
-    throw new NotImplementedException('ShipBob rate quotation integration pending carrier API credentials');
+    throw new NotImplementedException(
+      'ShipBob rate quotation integration pending carrier API credentials',
+    );
   }
 
   async bookShipment(_request: ShipmentBookingRequest): Promise<ShipmentBookingResponse> {
@@ -20,6 +22,8 @@ export class ShipBobCarrier implements CarrierAdapter {
   }
 
   verifyWebhookSignature(_signature: string, _payload: any): boolean {
-    throw new NotImplementedException('ShipBob webhook signature verification pending implementation');
+    throw new NotImplementedException(
+      'ShipBob webhook signature verification pending implementation',
+    );
   }
 }
