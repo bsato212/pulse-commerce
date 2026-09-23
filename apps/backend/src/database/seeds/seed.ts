@@ -274,7 +274,7 @@ async function seed() {
   if (!webhook1) {
     webhook1 = webhookRepo.create({
       tenantId: tenantAcme.id,
-      url: 'https://webhook.site/eval-acme-listener',
+      url: 'https://webhook.site/acme-order-events',
       secret: 'whsec_enterprise_sample_secret_key_84920491',
       events: ['order.created', 'order.shipped', 'inventory.low_stock'],
       active: true,

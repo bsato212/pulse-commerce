@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, ShoppingCart, Boxes, Package, Layers, Sparkles } from 'lucide-react';
+import { LayoutDashboard, ShoppingCart, Boxes, Package, Layers, Sliders } from 'lucide-react';
 
 export type ActiveTab = 'dashboard' | 'orders' | 'inventory' | 'products' | 'extensions';
 
@@ -14,7 +14,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
     { id: 'orders', label: 'Orders & Fulfillment', icon: ShoppingCart },
     { id: 'inventory', label: 'Multi-Warehouse', icon: Boxes },
     { id: 'products', label: 'Catalog Products', icon: Package },
-    { id: 'extensions', label: 'PR & CR Playground', icon: Sparkles, badge: 'Evaluation' },
+    { id: 'extensions', label: 'System Extensions', icon: Sliders, badge: 'Modular' },
   ];
 
   return (
@@ -53,10 +53,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
       <div className="p-3 bg-slate-800/40 border border-slate-800 rounded-xl text-xs text-slate-400">
         <div className="flex items-center space-x-2 text-slate-300 font-medium mb-1">
           <Layers className="w-3.5 h-3.5 text-indigo-400" />
-          <span>Evaluation Stack</span>
+          <span>PulseCommerce Enterprise</span>
         </div>
         <p className="text-[11px] text-slate-400 leading-relaxed">
-          Fullstack OMS configured for AI Agent PR generation & Code Review validation.
+          High-throughput order management, real-time inventory allocation, and multi-carrier
+          fulfillment.
         </p>
       </div>
     </aside>

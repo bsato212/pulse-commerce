@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { fetchApi } from '../api/client';
-import { Sparkles, GitPullRequest, Send } from 'lucide-react';
+import { Sliders, Layers, Send } from 'lucide-react';
 
 export const ExtensionHooksPage: React.FC = () => {
   const [outboxResult, setOutboxResult] = useState<any | null>(null);
@@ -24,22 +24,23 @@ export const ExtensionHooksPage: React.FC = () => {
       <div className="p-6 bg-gradient-to-r from-indigo-900/60 via-purple-900/40 to-slate-900 border border-indigo-700/50 rounded-2xl">
         <div className="flex items-center space-x-3 mb-2">
           <div className="p-2 rounded-lg bg-indigo-500/20 text-indigo-400">
-            <Sparkles className="w-5 h-5" />
+            <Sliders className="w-5 h-5" />
           </div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">AI Evaluation Playground</h1>
+          <h1 className="text-2xl font-bold text-white tracking-tight">
+            System Extensions & Integrations
+          </h1>
         </div>
         <p className="text-sm text-slate-300 max-w-3xl leading-relaxed">
-          This fullstack repository is pre-configured with standardized architectural hooks for
-          evaluating
-          <strong> AI Draft PR generation</strong> and <strong>AI Code Review (CR)</strong> agents.
+          Modular architecture extension interfaces for pluggable 3PL logistics adapters, dynamic
+          promotional pricing strategies, and asynchronous event workers.
         </p>
       </div>
 
-      {/* Draft PR Targets Grid */}
+      {/* Extension Interfaces Grid */}
       <div>
         <h2 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
-          <GitPullRequest className="w-5 h-5 text-indigo-400" />
-          <span>Pending Feature Extension Hooks (For Draft PR Testing)</span>
+          <Layers className="w-5 h-5 text-indigo-400" />
+          <span>Modular Extension Interfaces</span>
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {/* Hook 1: ShipBob 3PL */}
@@ -47,9 +48,9 @@ export const ExtensionHooksPage: React.FC = () => {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[11px] font-semibold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">
-                  Feature Hook A
+                  Carrier Adapter
                 </span>
-                <span className="text-xs text-amber-400 font-mono">STUB READY</span>
+                <span className="text-xs text-amber-400 font-mono">STUB INTERFACE</span>
               </div>
               <h3 className="font-bold text-white text-base">ShipBob 3PL Carrier Adapter</h3>
               <p className="text-xs text-slate-400 mt-2 leading-relaxed">
@@ -61,8 +62,8 @@ export const ExtensionHooksPage: React.FC = () => {
               </div>
             </div>
             <div className="mt-4 pt-3 border-t border-slate-800 text-[11px] text-slate-400">
-              <strong>Evaluation Goal:</strong> Agent should implement `CarrierAdapter` interface,
-              mock HTTP API calls, and add unit tests.
+              <strong>Interface Contract:</strong> Implements <code>CarrierAdapter</code> interface
+              with rates, shipment label generation, and webhook ingestion.
             </div>
           </div>
 
@@ -71,9 +72,9 @@ export const ExtensionHooksPage: React.FC = () => {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[11px] font-semibold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">
-                  Feature Hook B
+                  Pricing Engine
                 </span>
-                <span className="text-xs text-amber-400 font-mono">STRATEGY READY</span>
+                <span className="text-xs text-amber-400 font-mono">STRATEGY PATTERN</span>
               </div>
               <h3 className="font-bold text-white text-base">Tiered Promotions Engine</h3>
               <p className="text-xs text-slate-400 mt-2 leading-relaxed">
@@ -85,8 +86,8 @@ export const ExtensionHooksPage: React.FC = () => {
               </div>
             </div>
             <div className="mt-4 pt-3 border-t border-slate-800 text-[11px] text-slate-400">
-              <strong>Evaluation Goal:</strong> Agent should implement `PromotionRuleStrategy`
-              classes and wire them into order calculation.
+              <strong>Interface Contract:</strong> Implements <code>PromotionRuleStrategy</code>{' '}
+              classes plugged into the transactional order calculation engine.
             </div>
           </div>
 
@@ -95,9 +96,9 @@ export const ExtensionHooksPage: React.FC = () => {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[11px] font-semibold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">
-                  Feature Hook C
+                  Event Dispatcher
                 </span>
-                <span className="text-xs text-amber-400 font-mono">HMAC READY</span>
+                <span className="text-xs text-amber-400 font-mono">HMAC PIPELINE</span>
               </div>
               <h3 className="font-bold text-white text-base">Tenant Webhook Worker</h3>
               <p className="text-xs text-slate-400 mt-2 leading-relaxed">
@@ -109,8 +110,8 @@ export const ExtensionHooksPage: React.FC = () => {
               </div>
             </div>
             <div className="mt-4 pt-3 border-t border-slate-800 text-[11px] text-slate-400">
-              <strong>Evaluation Goal:</strong> Agent should implement an exponential backoff loop
-              and delivery event status updates.
+              <strong>Interface Contract:</strong> Dispatches tenant webhooks with HMAC-SHA256
+              signatures and exponential backoff retry policies.
             </div>
           </div>
         </div>
@@ -122,7 +123,7 @@ export const ExtensionHooksPage: React.FC = () => {
           <div>
             <h3 className="font-bold text-white text-base">Transactional Outbox Event Trigger</h3>
             <p className="text-xs text-slate-400">
-              Test execution of the outbox processor pipeline against the backend API.
+              Trigger processing of pending transactional outbox events to test worker dispatching.
             </p>
           </div>
           <button
