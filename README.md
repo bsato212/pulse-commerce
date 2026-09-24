@@ -150,3 +150,13 @@ Services:
 - **Backend**: `http://localhost:3000`
 - **Postgres**: `localhost:5432`
 - **Valkey**: `localhost:6379`
+
+---
+
+## Continuous Integration (GitHub Actions)
+
+PulseCommerce includes a GitHub Actions CI pipeline (`.github/workflows/ci.yml`) triggered on pushes and pull requests to `master` and `main`:
+
+1. **Lint & Code Formatting**: Runs Prettier format checks (`npm run format:check`), ESLint (`npm run lint`), and verifies Docker Compose configuration (`docker compose config`).
+2. **Test Suite**: Executes workspace builds (`npm run build`), unit tests (`npm test`), backend end-to-end tests (`npm run test:e2e`), and integration tests (`npm run test:integration` via Testcontainers with PostgreSQL 18 & Valkey 9.0).
+3. **Docker Build (No Push)**: Sets up Docker Buildx with GitHub Actions layer caching (`type=gha`) and builds production container images for both `pulsecommerce-backend` and `pulsecommerce-frontend` without pushing to a registry.

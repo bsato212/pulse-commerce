@@ -1,0 +1,101 @@
+name: CI
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint & Code Formatting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify code formatting (Prettier)
+        run: npm run format:check
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Validate Docker Compose Configuration
+        run: docker compose config
+
+  test:
+    name: Test Suite (Unit, E2E & Integration)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build workspaces
+        run: npm run build
+
+      - name: Run unit tests
+        run: npm test
+
+      - name: Run backend end-to-end tests
+        run: npm run test:e2e --workspace=pulsecommerce-backend
+
+      - name: Run backend integration tests (PostgreSQL 18 & Valkey 9.0)
+        run: npm run test:integration
+
+  docker-build:
+    name: Docker Build (${{ matrix.service.name }})
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - name: backend
+            file: apps/backend/Dockerfile
+            target: runner
+            image: pulsecommerce-backend
+          - name: frontend
+            file: apps/frontend/Dockerfile
+            target: runner
+            image: pulsecommerce-frontend
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build ${{ matrix.service.name }} Docker image (no push)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.service.file }}
+          target: ${{ matrix.service.target }}
+          push: false
+          tags: ${{ matrix.service.image }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+

@@ -49,6 +49,7 @@ pulsecommerce/
 - **Frontend**: React 19, TypeScript, Vite, Tailwind CSS, Lucide React
 - **Code Quality**: ESLint 9 (flat config) and Prettier 3
 - **Containerization**: Docker Compose v2
+- **CI/CD**: GitHub Actions (`.github/workflows/ci.yml` - lint, test, and Docker build without push)
 
 ---
 
